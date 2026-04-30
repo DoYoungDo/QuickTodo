@@ -68,7 +68,7 @@ func (l *LocalRepository) AddTodos([]*Todo) error {
 
 // GetTodos implements [Repository].
 func (l *LocalRepository) GetTodos() ([]*Todo, error) {
-	panic("unimplemented")
+	return l.list.List, nil
 }
 
 // ModifyTodo implements [Repository].

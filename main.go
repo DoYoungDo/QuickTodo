@@ -1,11 +1,11 @@
 package main
 
 import (
-	//"github.com/jroimartin/gocui"
 	"fmt"
 	"os"
 	"todo_list/internal/app"
 	"todo_list/internal/processor"
+	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -82,10 +82,16 @@ func main() {
 
 	// 根命令 action：todo xxx 等同于 todo add xxx
 	todo.Action(func(ctx *cmd.Context) {
-		// todo := ctx.Args()[0]
-		// if todo.IsString() && todo.ToString() != "" {
-		// fmt.Println("add todo:", todo.ToString())
-		// }
+		argsSize := len(ctx.Args())
+		if argsSize == 0 {
+			ui.NewMainWindow().ShowAndRun()
+		} else {
+			args := []string{"add"}
+			for _, arg := range ctx.Args() {
+				args = append(args, arg.ForceToString())
+			}
+			todo.Parse(args)
+		}
 	})
 
 	if err := todo.Parse(os.Args[1:]); err != nil {
