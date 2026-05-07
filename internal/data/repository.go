@@ -16,6 +16,7 @@ type Repository interface {
 	GetTodos() ([]*Todo, error)
 	ModifyTodo(id int, todo *Todo) error
 	RemoveTodo(id int) error
+	Size() int
 }
 
 var CreateRepository = sync.OnceValue(func() Repository {

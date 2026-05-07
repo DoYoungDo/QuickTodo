@@ -81,6 +81,10 @@ func (l *LocalRepository) RemoveTodo(id int) error {
 	panic("unimplemented")
 }
 
+func (l *LocalRepository) Size() int {
+	return len(l.list.List)
+}
+
 func (l *LocalRepository) flushToLocal() error {
 	data, err := json.Marshal(l.list)
 	if err != nil {
