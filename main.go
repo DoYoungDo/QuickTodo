@@ -5,7 +5,6 @@ import (
 	"os"
 	"todo_list/internal/app"
 	"todo_list/internal/processor"
-	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -84,7 +83,7 @@ func main() {
 	todo.Action(func(ctx *cmd.Context) {
 		argsSize := len(ctx.Args())
 		if argsSize == 0 {
-			ui.NewMainWindow().ShowAndRun()
+			// ui.NewMainWindow().ShowAndRun()
 		} else {
 			args := []string{"add"}
 			for _, arg := range ctx.Args() {
