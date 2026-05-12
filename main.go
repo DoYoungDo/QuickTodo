@@ -41,9 +41,11 @@ func main() {
 
 	// list
 	todo.Command("list", "显示 待办项").
-		Arguments("[range]", "显示范围", nil).
-		Options("-d, --done [done]", "只显示完成的", nil).
-		Options("-c, --count", "显示数量", false).
+		Options("-d, --done", "只显示完成的", nil).
+		Options("-f, --filter <matchs>", "匹配内容", nil).
+		Options("-i, --ignoreCase", "忽略大小写", nil).
+		Options("-b, --begin <begin>", "开始索引", nil).
+		Options("-e, --end <end>", "结束索引", nil).
 		Action(processor.List)
 
 	// done
