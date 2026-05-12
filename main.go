@@ -44,9 +44,7 @@ func main() {
 		Arguments("[range]", "显示范围", nil).
 		Options("-d, --done [done]", "只显示完成的", nil).
 		Options("-c, --count", "显示数量", false).
-		Action(func(ctx *cmd.Context) {
-			fmt.Println("list todos")
-		})
+		Action(processor.List)
 
 	// done
 	todo.Command("done", "完成 待办项").

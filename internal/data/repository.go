@@ -7,6 +7,7 @@ type Todo struct {
 	Content    string  `json:"content"`
 	CreateTime string  `json:"createTime"`
 	FinishTime *string `json:"finishTime"`
+	Level      *int    `json:"level"`
 	Done       bool    `json:"done"`
 }
 

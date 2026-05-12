@@ -53,7 +53,7 @@ func (l *LocalRepository) CreateAndAddTodo(content string, done bool) (*Todo, er
 	toto := Todo{
 		ID:         len(l.list.List),
 		Content:    content,
-		CreateTime: time.Now().String(),
+		CreateTime: time.Now().Format(time.RFC3339),
 		Done:       done,
 	}
 	l.list.List = append(l.list.List, &toto)

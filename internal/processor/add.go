@@ -3,6 +3,7 @@ package processor
 import (
 	"fmt"
 	"todo_list/internal/data"
+	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -15,10 +16,11 @@ func Add(ctx *cmd.Context) {
 		return false
 	}()
 
-	repository := data.CreateRepository()
+	tb := ui.NewTodoTable()
 
-	todoList := make([]*data.Todo, 0, len(ctx.Args()))
+	repository := data.CreateRepository()
 	failedTodoList := make([]string, 0, len(ctx.Args()))
+
 	for _, ct := range ctx.Args() {
 		todo, err := repository.CreateAndAddTodo(ct.ForceToString(), done)
 		if err != nil {
@@ -26,8 +28,12 @@ func Add(ctx *cmd.Context) {
 			failedTodoList = append(failedTodoList, fmt.Sprintf("add todo:`%v` faild.", ct.ForceToString()))
 			continue
 		}
-		todoList = append(todoList, todo)
+
+		tb.AddTodo(todo)
 	}
 
-	fmt.Println(todoList, failedTodoList)
+	tb.Show()
+	if len(failedTodoList) > 0 {
+		fmt.Println(failedTodoList)
+	}
 }
