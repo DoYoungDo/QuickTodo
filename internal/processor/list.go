@@ -28,7 +28,7 @@ func List(ctx *cmd.Context) {
 		}
 		return hd, d, f, i, b, e
 	}()
-	fmt.Println(hasDone, done, filter, ignoreCase, begin, end)
+	// fmt.Println(hasDone, done, filter, ignoreCase, begin, end)
 
 	tb := ui.NewTodoTable()
 
@@ -38,6 +38,11 @@ func List(ctx *cmd.Context) {
 		fmt.Println(err)
 		return
 	}
+	if len(todos) == 0 {
+		tb.Show()
+		return
+	}
+
 	for _, todo := range todos {
 		tb.AddTodo(todo)
 	}

@@ -12,12 +12,13 @@ import (
 func main() {
 	todo := cmd.New(app.APP_NAME).
 		Version(app.APP_VERSION).
-		Description("todo list")
+		Description("todo list").
+		Arguments("[todo...]", "待办项", nil)
 
 	// add
 	todo.Command("add", "添加 待办项").
 		Arguments("<todo...>", "待办项", nil).
-		Options("-d, --done", "添加时完成", false).
+		Options("-d, --done", "添加时完成", nil).
 		Action(processor.Add)
 
 	// rm
@@ -63,16 +64,6 @@ func main() {
 			fmt.Println("mv todo:", ctx.Args()[0].ToString(), "->", ctx.Args()[0].ToString())
 		})
 
-	// find
-	todo.Command("find", "查找 待办项").
-		Arguments("<todo...>", "查找内容", nil).
-		Options("-c, --caseSensitive", "区分大小写", false).
-		Options("-s, --single", "匹配单个条件", false).
-		Options("-d, --done [done]", "匹配完成待办", nil).
-		Action(func(ctx *cmd.Context) {
-			fmt.Println("find todo:", ctx.Args()[0].ToString())
-		})
-
 	// clear
 	todo.Command("clear", "清空 待办项").
 		Action(func(ctx *cmd.Context) {
@@ -83,7 +74,7 @@ func main() {
 	todo.Action(func(ctx *cmd.Context) {
 		argsSize := len(ctx.Args())
 		if argsSize == 0 {
-			// ui.NewMainWindow().ShowAndRun()
+			todo.Parse([]string{"list"})
 		} else {
 			args := []string{"add"}
 			for _, arg := range ctx.Args() {

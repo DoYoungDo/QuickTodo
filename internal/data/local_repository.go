@@ -50,15 +50,18 @@ func NewLocalRepository() *LocalRepository {
 
 // CreateAndAddTodo implements [Repository].
 func (l *LocalRepository) CreateAndAddTodo(content string, done bool) (*Todo, error) {
-	toto := Todo{
+	todo := Todo{
 		ID:         len(l.list.List),
 		Content:    content,
 		CreateTime: time.Now().Format(time.RFC3339),
 		Done:       done,
 	}
-	l.list.List = append(l.list.List, &toto)
+	if done {
+		todo.FinishTime = &todo.CreateTime
+	}
+	l.list.List = append(l.list.List, &todo)
 
-	return &toto, l.flushToLocal()
+	return &todo, l.flushToLocal()
 }
 
 // AddTodos implements [Repository].

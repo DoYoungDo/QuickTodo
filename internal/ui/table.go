@@ -40,7 +40,6 @@ func newTable() table.Writer {
 	tb.SetStyle(myStyle)
 	return tb
 }
-
 func NewTodoTable() *ToDoTable {
 	return NewTodoTableWithTitle("")
 }
