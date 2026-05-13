@@ -13,10 +13,10 @@ type Todo struct {
 
 type Repository interface {
 	CreateAndAddTodo(content string, done bool) (*Todo, error)
-	AddTodos([]*Todo) error
+	AddTodos([]*Todo) ([]*Todo, error)
 	GetTodos() ([]*Todo, error)
 	ModifyTodo(id int, todo *Todo) error
-	RemoveTodo(id int) error
+	RemoveTodos(ids []int) ([]*Todo, error)
 	Size() int
 }
 

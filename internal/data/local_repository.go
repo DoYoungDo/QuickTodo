@@ -50,7 +50,7 @@ func NewLocalRepository() *LocalRepository {
 
 // CreateAndAddTodo implements [Repository].
 func (l *LocalRepository) CreateAndAddTodo(content string, done bool) (*Todo, error) {
-	todo := Todo{
+	todo := &Todo{
 		ID:         len(l.list.List),
 		Content:    content,
 		CreateTime: time.Now().Format(time.RFC3339),
@@ -59,14 +59,15 @@ func (l *LocalRepository) CreateAndAddTodo(content string, done bool) (*Todo, er
 	if done {
 		todo.FinishTime = &todo.CreateTime
 	}
-	l.list.List = append(l.list.List, &todo)
 
-	return &todo, l.flushToLocal()
+	_, err := l.AddTodos([]*Todo{todo})
+	return todo, err
 }
 
 // AddTodos implements [Repository].
-func (l *LocalRepository) AddTodos([]*Todo) error {
-	panic("unimplemented")
+func (l *LocalRepository) AddTodos(todos []*Todo) ([]*Todo, error) {
+	l.list.List = append(l.list.List, todos...)
+	return todos, l.flushToLocal()
 }
 
 // GetTodos implements [Repository].
@@ -80,8 +81,31 @@ func (l *LocalRepository) ModifyTodo(id int, todo *Todo) error {
 }
 
 // RemoveTodo implements [Repository].
-func (l *LocalRepository) RemoveTodo(id int) error {
-	panic("unimplemented")
+func (l *LocalRepository) RemoveTodos(ids []int) ([]*Todo, error) {
+	idsMap := make(map[int]interface{}, len(ids))
+	for _, id := range ids {
+		idsMap[id] = struct{}{}
+	}
+
+	toRemoveTodos := make([]*Todo, 0, len(ids))
+	lastTodos := make([]*Todo, 0, len(l.list.List))
+
+	for _, todo := range l.list.List {
+		if _, exist := idsMap[todo.ID]; exist {
+			toRemoveTodos = append(toRemoveTodos, todo)
+		} else {
+			lastTodos = append(lastTodos, todo)
+		}
+	}
+
+	if len(lastTodos) > 0 {
+		for i, todo := range lastTodos {
+			todo.ID = i
+		}
+	}
+	l.list.List = lastTodos
+
+	return toRemoveTodos, l.flushToLocal()
 }
 
 func (l *LocalRepository) Size() int {

@@ -24,9 +24,7 @@ func main() {
 	// rm
 	todo.Command("rm", "删除 待办项").
 		Arguments("<index...>", "索引序号", nil).
-		Action(func(ctx *cmd.Context) {
-			fmt.Println("rm todo:", ctx.Args()[0].ToString())
-		})
+		Action(processor.Remove)
 
 	// mod
 	todo.Command("mod", "修改 待办项").
