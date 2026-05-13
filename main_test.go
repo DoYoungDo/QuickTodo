@@ -91,6 +91,21 @@ func TestCLIEndToEndTodoFlow(t *testing.T) {
 		t.Fatalf("rm output unexpected: %s", output)
 	}
 
+	output = runQuickTodo(t, configDir, "done", "0")
+	if !strings.Contains(output, "modified") || !strings.Contains(output, "NOW: update README - urgent") || !strings.Contains(output, "✅") {
+		t.Fatalf("done output unexpected: %s", output)
+	}
+
+	output = runQuickTodo(t, configDir, "clear", "-f")
+	if !strings.Contains(output, "cleared") || !strings.Contains(output, "NOW: update README - urgent") {
+		t.Fatalf("clear output unexpected: %s", output)
+	}
+
+	output = runQuickTodo(t, configDir, "list")
+	if strings.Contains(output, "NOW: update README - urgent") || strings.Contains(output, "ship release") {
+		t.Fatalf("list after clear should be empty: %s", output)
+	}
+
 	dataFile := filepath.Join(configDir, "Library", "Application Support", "QuickTodo", "todos", "default.json")
 	if runtime.GOOS != "darwin" {
 		dataFile = filepath.Join(configDir, "QuickTodo", "todos", "default.json")
@@ -100,7 +115,7 @@ func TestCLIEndToEndTodoFlow(t *testing.T) {
 	}
 }
 
-func TestCLIRootCommandShortcutsAndPlaceholders(t *testing.T) {
+func TestCLIRootCommandShortcuts(t *testing.T) {
 	configDir := t.TempDir()
 
 	output := runQuickTodo(t, configDir, "root task")
@@ -113,13 +128,4 @@ func TestCLIRootCommandShortcutsAndPlaceholders(t *testing.T) {
 		t.Fatalf("root list output unexpected: %s", output)
 	}
 
-	output = runQuickTodo(t, configDir, "done", "0")
-	if !strings.Contains(output, "done todo: 0") {
-		t.Fatalf("done placeholder output unexpected: %s", output)
-	}
-
-	output = runQuickTodo(t, configDir, "clear")
-	if !strings.Contains(output, "clear all todos") {
-		t.Fatalf("clear placeholder output unexpected: %s", output)
-	}
 }

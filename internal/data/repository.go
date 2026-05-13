@@ -18,6 +18,7 @@ type Repository interface {
 	GetTodoById(id int) (*Todo, error)
 	ModifyTodo(id int, todo *Todo) error
 	RemoveTodos(ids []int) ([]*Todo, error)
+	ClearTodos() ([]*Todo, error)
 	Size() int
 }
 

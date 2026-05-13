@@ -168,6 +168,34 @@ func TestLocalRepository_RemoveTodosMissingID(t *testing.T) {
 	}
 }
 
+func TestLocalRepository_ClearTodos(t *testing.T) {
+	repo, path := newTestRepository(t)
+	for _, content := range []string{"one", "two"} {
+		if _, err := repo.CreateAndAddTodo(content, false); err != nil {
+			t.Fatalf("CreateAndAddTodo(%q) error = %v", content, err)
+		}
+	}
+
+	cleared, err := repo.ClearTodos()
+	if err != nil {
+		t.Fatalf("ClearTodos() error = %v", err)
+	}
+	if len(cleared) != 2 || cleared[0].Content != "one" || cleared[1].Content != "two" {
+		t.Fatalf("unexpected cleared todos: %+v", cleared)
+	}
+	if repo.Size() != 0 {
+		t.Fatalf("Size() = %d, want 0", repo.Size())
+	}
+
+	reopened, err := NewLocalRepositoryWithPath(path)
+	if err != nil {
+		t.Fatalf("NewLocalRepositoryWithPath(reopen) error = %v", err)
+	}
+	if reopened.Size() != 0 {
+		t.Fatalf("reopened Size() = %d, want 0", reopened.Size())
+	}
+}
+
 func TestLocalRepository_LoadInvalidJSON(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "todos.json")
 	if err := os.WriteFile(path, []byte("not json"), 0644); err != nil {

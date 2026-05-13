@@ -49,14 +49,17 @@ func main() {
 	todo.Command("done", "完成 待办项，等价于：mod <index> -d").
 		Arguments("<index...>", "索引序号", nil).
 		Action(func(ctx *cmd.Context) {
-			fmt.Println("done todo:", ctx.Args()[0].ForceToString())
+			for _, arg := range ctx.Args() {
+				if err := todo.Parse([]string{"mod", arg.ForceToString(), "-d"}); err != nil {
+					fmt.Fprintln(os.Stderr, "error:", err)
+				}
+			}
 		})
 
 	// clear
 	todo.Command("clear", "清空 待办项").
-		Action(func(ctx *cmd.Context) {
-			fmt.Println("clear all todos")
-		})
+		Options("-f, --force", "不弹出确认，强制清空", nil).
+		Action(processor.Clear)
 
 	// 根命令 action：todo xxx 等同于 todo add xxx
 	todo.Action(func(ctx *cmd.Context) {

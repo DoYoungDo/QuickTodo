@@ -155,6 +155,12 @@ func (l *LocalRepository) RemoveTodos(ids []int) ([]*Todo, error) {
 	return toRemoveTodos, l.flushToLocal()
 }
 
+func (l *LocalRepository) ClearTodos() ([]*Todo, error) {
+	clearedTodos := l.list.List
+	l.list.List = []*Todo{}
+	return clearedTodos, l.flushToLocal()
+}
+
 func (l *LocalRepository) Size() int {
 	return len(l.list.List)
 }
@@ -167,6 +173,8 @@ func (l *LocalRepository) flushToLocal() error {
 
 	return os.WriteFile(l.dataFile, data, 0644)
 }
+
+// cloneTodo ensures returned todo pointers cannot mutate repository-owned data.
 func (l *LocalRepository) cloneTodo(todo *Todo) *Todo {
 	var finishTime *string
 	if todo.FinishTime != nil {

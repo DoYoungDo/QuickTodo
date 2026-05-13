@@ -246,3 +246,66 @@ func TestRemoveTodosDeletesAll(t *testing.T) {
 		t.Fatalf("unexpected delete-all output: %s", output)
 	}
 }
+
+func TestClearTodosRemovesAllItems(t *testing.T) {
+	repo := newProcessorTestRepository(t)
+	for _, content := range []string{"first", "second"} {
+		if _, err := repo.CreateAndAddTodo(content, false); err != nil {
+			t.Fatalf("CreateAndAddTodo(%q) error = %v", content, err)
+		}
+	}
+	var out bytes.Buffer
+
+	if err := clearTodos(repo, &out, strings.NewReader(""), true); err != nil {
+		t.Fatalf("clearTodos() error = %v", err)
+	}
+	if repo.Size() != 0 {
+		t.Fatalf("Size() = %d, want 0", repo.Size())
+	}
+	output := out.String()
+	if !strings.Contains(output, "cleared") || !strings.Contains(output, "first") || !strings.Contains(output, "second") {
+		t.Fatalf("unexpected clear output: %s", output)
+	}
+}
+
+func TestClearTodosEmptyRepository(t *testing.T) {
+	repo := newProcessorTestRepository(t)
+	var out bytes.Buffer
+
+	if err := clearTodos(repo, &out, strings.NewReader(""), true); err != nil {
+		t.Fatalf("clearTodos() error = %v", err)
+	}
+	if repo.Size() != 0 || !strings.Contains(out.String(), "cleared") {
+		t.Fatalf("unexpected empty clear result: size=%d output=%s", repo.Size(), out.String())
+	}
+}
+
+func TestClearTodosCancelsWithoutConfirmation(t *testing.T) {
+	repo := newProcessorTestRepository(t)
+	if _, err := repo.CreateAndAddTodo("keep", false); err != nil {
+		t.Fatalf("CreateAndAddTodo() error = %v", err)
+	}
+	var out bytes.Buffer
+
+	if err := clearTodos(repo, &out, strings.NewReader("n\n"), false); err != nil {
+		t.Fatalf("clearTodos() error = %v", err)
+	}
+	if repo.Size() != 1 || !strings.Contains(out.String(), "clear cancelled") {
+		t.Fatalf("unexpected cancelled clear result: size=%d output=%s", repo.Size(), out.String())
+	}
+}
+
+func TestClearTodosConfirmsBeforeClear(t *testing.T) {
+	repo := newProcessorTestRepository(t)
+	if _, err := repo.CreateAndAddTodo("remove", false); err != nil {
+		t.Fatalf("CreateAndAddTodo() error = %v", err)
+	}
+	var out bytes.Buffer
+
+	if err := clearTodos(repo, &out, strings.NewReader("y\n"), false); err != nil {
+		t.Fatalf("clearTodos() error = %v", err)
+	}
+	if repo.Size() != 0 || !strings.Contains(out.String(), "This will clear all todos") || !strings.Contains(out.String(), "cleared") {
+		t.Fatalf("unexpected confirmed clear result: size=%d output=%s", repo.Size(), out.String())
+	}
+}
