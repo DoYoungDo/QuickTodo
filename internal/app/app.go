@@ -1,6 +1,5 @@
 package app
 
-const (
-	APP_NAME    = "QuickTodo"
-	APP_VERSION = "0.0.1"
-)
+const APP_NAME = "QuickTodo"
+
+var APP_VERSION = "dev"

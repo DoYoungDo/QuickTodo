@@ -173,3 +173,9 @@ GitHub Actions 会在符合 `v1.2.3` 格式的 tag 上创建 Release，并上传
 git tag v0.1.0
 git push origin v0.1.0
 ```
+
+Release 构建会从 tag 注入应用版本号：`v0.1.0` 对应程序版本 `0.1.0`。本地调试构建默认版本为 `dev`，也可以手动注入：
+
+```sh
+go build -ldflags="-X todo_list/internal/app.APP_VERSION=0.1.0" -o qtd .
+```
