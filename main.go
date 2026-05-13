@@ -54,14 +54,6 @@ func main() {
 			fmt.Println("done todo:", ctx.Args()[0].ToString())
 		})
 
-	// mv
-	todo.Command("mv", "移动 待办项").
-		Arguments("<index>", "待移动的待办项索引序号", nil).
-		Arguments("<distindex>", "目标索引序号", nil).
-		Action(func(ctx *cmd.Context) {
-			fmt.Println("mv todo:", ctx.Args()[0].ToString(), "->", ctx.Args()[0].ToString())
-		})
-
 	// clear
 	todo.Command("clear", "清空 待办项").
 		Action(func(ctx *cmd.Context) {
