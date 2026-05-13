@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"iter"
 	"os"
+	"path/filepath"
 	"slices"
 	"time"
 	"todo_list/internal/app"
@@ -28,13 +29,20 @@ func NewLocalRepository() *LocalRepository {
 		panic(err)
 	}
 
-	appDataDir += fmt.Sprintf("/%v/todos/", app.APP_NAME)
-	if _, err := os.Stat(appDataDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(appDataDir, 0755); err != nil {
-			panic(err)
-		}
+	todoDataFile := filepath.Join(appDataDir, app.APP_NAME, "todos", "default.json")
+	repository, err := NewLocalRepositoryWithPath(todoDataFile)
+	if err != nil {
+		panic(err)
 	}
-	todoDataFile := fmt.Sprintf("%sdefault.json", appDataDir)
+	return repository
+}
+
+func NewLocalRepositoryWithPath(todoDataFile string) (*LocalRepository, error) {
+	appDataDir := filepath.Dir(todoDataFile)
+	if err := os.MkdirAll(appDataDir, 0755); err != nil {
+		return nil, err
+	}
+
 	todoDataList := &localTodoList{
 		Name: "default",
 		Date: time.Now().String(),
@@ -42,13 +50,17 @@ func NewLocalRepository() *LocalRepository {
 	}
 	if _, err := os.Stat(todoDataFile); !os.IsNotExist(err) {
 		if todoData, err := os.ReadFile(todoDataFile); err == nil {
-			json.Unmarshal(todoData, todoDataList)
+			if err := json.Unmarshal(todoData, todoDataList); err != nil {
+				return nil, fmt.Errorf("load todo data: %w", err)
+			}
+		} else {
+			return nil, err
 		}
 	}
 	return &LocalRepository{
 		list:     todoDataList,
 		dataFile: todoDataFile,
-	}
+	}, nil
 }
 
 // CreateAndAddTodo implements [Repository].
@@ -111,7 +123,7 @@ func (l *LocalRepository) ModifyTodo(id int, todo *Todo) error {
 	if index == -1 {
 		return errors.New("todo not found")
 	}
-	l.list.List[index] = todo
+	l.list.List[index] = l.cloneTodo(todo)
 	return l.flushToLocal()
 }
 
@@ -156,12 +168,22 @@ func (l *LocalRepository) flushToLocal() error {
 	return os.WriteFile(l.dataFile, data, 0644)
 }
 func (l *LocalRepository) cloneTodo(todo *Todo) *Todo {
+	var finishTime *string
+	if todo.FinishTime != nil {
+		val := *todo.FinishTime
+		finishTime = &val
+	}
+	var priority *int
+	if todo.Priority != nil {
+		val := *todo.Priority
+		priority = &val
+	}
 	return &Todo{
 		ID:         todo.ID,
 		Content:    todo.Content,
 		CreateTime: todo.CreateTime,
-		FinishTime: todo.FinishTime,
-		Priority:   todo.Priority,
+		FinishTime: finishTime,
+		Priority:   priority,
 		Done:       todo.Done,
 	}
 }

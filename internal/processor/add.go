@@ -2,6 +2,8 @@ package processor
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"todo_list/internal/data"
 	"todo_list/internal/ui"
 
@@ -16,24 +18,36 @@ func Add(ctx *cmd.Context) {
 		return false
 	}()
 
-	tb := ui.NewTodoTable()
-
-	repository := data.CreateRepository()
-	failedTodoList := make([]string, 0, len(ctx.Args()))
-
+	contents := make([]string, 0, len(ctx.Args()))
 	for _, ct := range ctx.Args() {
-		todo, err := repository.CreateAndAddTodo(ct.ForceToString(), done)
+		contents = append(contents, ct.ForceToString())
+	}
+	if err := addTodos(data.CreateRepository(), os.Stdout, contents, done); err != nil {
+		fmt.Println(err)
+	}
+
+}
+
+func addTodos(repository data.Repository, out io.Writer, contents []string, done bool) error {
+	tb := ui.NewTodoTable()
+	failedTodoList := make([]string, 0, len(contents))
+
+	for _, content := range contents {
+		todo, err := repository.CreateAndAddTodo(content, done)
 		if err != nil {
-			fmt.Println(err)
-			failedTodoList = append(failedTodoList, fmt.Sprintf("add todo:`%v` faild.", ct.ForceToString()))
+			fmt.Fprintln(out, err)
+			failedTodoList = append(failedTodoList, fmt.Sprintf("add todo:`%v` faild.", content))
 			continue
 		}
 
 		tb.AddTodo(todo)
 	}
 
-	tb.Show()
-	if len(failedTodoList) > 0 {
-		fmt.Println(failedTodoList)
+	if err := tb.ShowTo(out); err != nil {
+		return err
 	}
+	if len(failedTodoList) > 0 {
+		fmt.Fprintln(out, failedTodoList)
+	}
+	return nil
 }

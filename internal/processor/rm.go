@@ -2,6 +2,8 @@ package processor
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"todo_list/internal/data"
 	"todo_list/internal/ui"
 
@@ -19,12 +21,15 @@ func Remove(ctx *cmd.Context) {
 	if len(intIds) == 0 {
 		return
 	}
+	if err := removeTodos(data.CreateRepository(), os.Stdout, intIds); err != nil {
+		fmt.Println(err)
+	}
+}
 
-	repository := data.CreateRepository()
+func removeTodos(repository data.Repository, out io.Writer, intIds []int) error {
 	removedTodos, err := repository.RemoveTodos(intIds)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	if len(removedTodos) > 0 {
@@ -32,19 +37,23 @@ func Remove(ctx *cmd.Context) {
 		for _, td := range removedTodos {
 			tb.AddTodo(td)
 		}
-		tb.Show()
+		if err := tb.ShowTo(out); err != nil {
+			return err
+		}
 	}
 
 	if repository.Size() > 0 {
 		lastTodos, err := repository.GetTodos()
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 		tb := ui.NewTodoTableWithTitle("last")
 		for _, td := range lastTodos {
 			tb.AddTodo(td)
 		}
-		tb.Show()
+		if err := tb.ShowTo(out); err != nil {
+			return err
+		}
 	}
+	return nil
 }

@@ -3,6 +3,8 @@ package processor
 import (
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"time"
 	"todo_list/internal/data"
 	"todo_list/internal/ui"
@@ -52,31 +54,55 @@ func Modify(ctx *cmd.Context) {
 		return oA, oI, oD, hasP, p
 	}()
 
-	repository := data.NewLocalRepository()
-	todo, err := repository.GetTodoById(index)
-	if err != nil {
+	if err := modifyTodo(data.CreateRepository(), os.Stdout, modifyOptions{
+		index:       index,
+		content:     content,
+		append:      oAppend,
+		insert:      oInsert,
+		done:        oDone,
+		hasPriority: hasPriority,
+		priority:    oPriority,
+	}); err != nil {
 		fmt.Println(err)
-		return
 	}
-	if oAppend {
-		todo.Content += content
-	} else if oInsert {
-		todo.Content = content + todo.Content
-	} else if content != "" {
-		todo.Content = content
+}
+
+type modifyOptions struct {
+	index       int
+	content     string
+	append      bool
+	insert      bool
+	done        bool
+	hasPriority bool
+	priority    int
+}
+
+func modifyTodo(repository data.Repository, out io.Writer, opts modifyOptions) error {
+	todo, err := repository.GetTodoById(opts.index)
+	if err != nil {
+		return err
 	}
-	if oDone {
-		todo.Done = oDone
+	if opts.append {
+		todo.Content += opts.content
+	} else if opts.insert {
+		todo.Content = opts.content + todo.Content
+	} else if opts.content != "" {
+		todo.Content = opts.content
+	}
+	if opts.done {
+		todo.Done = opts.done
 		timeNow := time.Now().Format(time.RFC3339)
 		todo.FinishTime = &timeNow
 	}
-	if hasPriority {
-		todo.Priority = &oPriority
+	if opts.hasPriority {
+		todo.Priority = &opts.priority
 	}
 
-	repository.ModifyTodo(todo.ID, todo)
+	if err := repository.ModifyTodo(todo.ID, todo); err != nil {
+		return err
+	}
 
 	tb := ui.NewTodoTableWithTitle("modified")
 	tb.AddTodo(todo)
-	tb.Show()
+	return tb.ShowTo(out)
 }

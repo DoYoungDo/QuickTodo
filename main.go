@@ -49,7 +49,7 @@ func main() {
 	todo.Command("done", "完成 待办项，等价于：mod <index> -d").
 		Arguments("<index...>", "索引序号", nil).
 		Action(func(ctx *cmd.Context) {
-			fmt.Println("done todo:", ctx.Args()[0].ToString())
+			fmt.Println("done todo:", ctx.Args()[0].ForceToString())
 		})
 
 	// clear

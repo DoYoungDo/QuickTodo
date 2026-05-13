@@ -2,6 +2,8 @@ package processor
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"todo_list/internal/data"
 	"todo_list/internal/ui"
 
@@ -29,33 +31,52 @@ func List(ctx *cmd.Context) {
 		return hd, d, f, i, b, e
 	}()
 	// fmt.Println(hasDone, done, filter, ignoreCase, begin, end)
+	if err := listTodos(data.CreateRepository(), os.Stdout, listOptions{
+		hasDone:    hasDone,
+		done:       done,
+		filter:     filter,
+		ignoreCase: ignoreCase,
+		begin:      begin,
+		end:        end,
+	}); err != nil {
+		fmt.Println(err)
+	}
 
+}
+
+type listOptions struct {
+	hasDone    bool
+	done       bool
+	filter     string
+	ignoreCase bool
+	begin      int
+	end        int
+}
+
+func listTodos(repository data.Repository, out io.Writer, opts listOptions) error {
 	tb := ui.NewTodoTable()
 
-	repository := data.CreateRepository()
 	todos, err := repository.GetTodos()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	if len(todos) == 0 {
-		tb.Show()
-		return
+		return tb.ShowTo(out)
 	}
 
 	for _, todo := range todos {
 		tb.AddTodo(todo)
 	}
 
-	if end == -1 {
-		end = todos[len(todos)-1].ID
+	if opts.end == -1 {
+		opts.end = todos[len(todos)-1].ID
 	}
-	tb.FilterID(begin, end)
-	if hasDone {
-		tb.FilterDone(done)
+	tb.FilterID(opts.begin, opts.end)
+	if opts.hasDone {
+		tb.FilterDone(opts.done)
 	}
-	if filter != "" {
-		tb.FilterContent(filter, ignoreCase)
+	if opts.filter != "" {
+		tb.FilterContent(opts.filter, opts.ignoreCase)
 	}
-	tb.Show()
+	return tb.ShowTo(out)
 }

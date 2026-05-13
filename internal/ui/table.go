@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"time"
 	"todo_list/internal/data"
@@ -91,6 +93,10 @@ func (t *ToDoTable) FilterContent(content string, ignoreCase bool) {
 	t.filterBy = append(t.filterBy, table.FilterBy{Name: TABLE_HEADER_CONTENT, Operator: table.Contains, Value: content, IgnoreCase: ignoreCase})
 }
 func (t *ToDoTable) Show() {
+	_ = t.ShowTo(os.Stdout)
+}
+func (t *ToDoTable) ShowTo(w io.Writer) error {
 	t.FilterBy(t.filterBy)
-	fmt.Println(t.Render())
+	_, err := fmt.Fprintln(w, t.Render())
+	return err
 }
