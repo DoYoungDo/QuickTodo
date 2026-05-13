@@ -7,7 +7,7 @@ type Todo struct {
 	Content    string  `json:"content"`
 	CreateTime string  `json:"createTime"`
 	FinishTime *string `json:"finishTime"`
-	Level      *int    `json:"level"`
+	Priority   *int    `json:"Priority"`
 	Done       bool    `json:"done"`
 }
 
@@ -15,6 +15,7 @@ type Repository interface {
 	CreateAndAddTodo(content string, done bool) (*Todo, error)
 	AddTodos([]*Todo) ([]*Todo, error)
 	GetTodos() ([]*Todo, error)
+	GetTodoById(id int) (*Todo, error)
 	ModifyTodo(id int, todo *Todo) error
 	RemoveTodos(ids []int) ([]*Todo, error)
 	Size() int

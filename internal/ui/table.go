@@ -13,11 +13,11 @@ import (
 const (
 	FLAG_DONE     = "✅"
 	FLAG_NOT_DONE = "❌"
-	FLAG_LEVEL    = "⭐"
+	FLAG_PRIORITY = "⭐"
 
 	TABLE_HEADER_ID          = "ID"
 	TABLE_HEADER_DONE        = "Done"
-	TABLE_HEADER_LEVEL       = "Level"
+	TABLE_HEADER_LEVEL       = "Priority"
 	TABLE_HEADER_CONTENT     = "Content"
 	TABLE_HEADER_CREATE_TIME = "CreateTime"
 	TABLE_HEADER_FINISH_TIME = "FinishTime"
@@ -60,10 +60,10 @@ func (t *ToDoTable) AddTodo(todo *data.Todo) {
 			return FLAG_NOT_DONE
 		}(),
 		func() string {
-			if todo.Level == nil {
+			if todo.Priority == nil {
 				return ""
 			}
-			return strings.Repeat(FLAG_LEVEL, *todo.Level)
+			return strings.Repeat(FLAG_PRIORITY, *todo.Priority)
 		}(),
 		todo.Content,
 		func() string {

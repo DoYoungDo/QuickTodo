@@ -30,13 +30,11 @@ func main() {
 	todo.Command("mod", "修改 待办项").
 		Arguments("<index>", "索引序号", nil).
 		Arguments("[todo]", "待办内容", nil).
-		Options("-a, --todoend", "在原内容上追加", false).
-		Options("-i, --insert", "在原内容上头插", false).
-		Options("-d, --done [done]", "修改为完成", nil).
-		Options("-p, --priority <priority>", "设置优先级，取值1-5", nil).
-		Action(func(ctx *cmd.Context) {
-			fmt.Println("mod todo index:", ctx.Args()[0].ToString())
-		})
+		Options("-a, --append", "在原内容上追加，append优先于insert", nil).
+		Options("-i, --insert", "在原内容上头插，insert让步于append", nil).
+		Options("-d, --done", "修改为完成状态", nil).
+		Options("-p, --priority <priority>", "设置优先级，取值0-5", nil).
+		Action(processor.Modify)
 
 	// list
 	todo.Command("list", "显示 待办项").
@@ -48,7 +46,7 @@ func main() {
 		Action(processor.List)
 
 	// done
-	todo.Command("done", "完成 待办项").
+	todo.Command("done", "完成 待办项，等价于：mod <index> -d").
 		Arguments("<index...>", "索引序号", nil).
 		Action(func(ctx *cmd.Context) {
 			fmt.Println("done todo:", ctx.Args()[0].ToString())

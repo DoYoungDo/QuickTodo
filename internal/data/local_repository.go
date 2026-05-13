@@ -2,8 +2,11 @@ package data
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"iter"
 	"os"
+	"slices"
 	"time"
 	"todo_list/internal/app"
 )
@@ -61,23 +64,55 @@ func (l *LocalRepository) CreateAndAddTodo(content string, done bool) (*Todo, er
 	}
 
 	_, err := l.AddTodos([]*Todo{todo})
-	return todo, err
+	return l.cloneTodo(todo), err
 }
 
 // AddTodos implements [Repository].
 func (l *LocalRepository) AddTodos(todos []*Todo) ([]*Todo, error) {
-	l.list.List = append(l.list.List, todos...)
+	l.list.List = append(l.list.List, slices.Collect(func() iter.Seq[*Todo] {
+		return func(yield func(*Todo) bool) {
+			for _, t := range todos {
+				if !yield(l.cloneTodo(t)) {
+					return
+				}
+			}
+		}
+	}())...)
 	return todos, l.flushToLocal()
 }
 
 // GetTodos implements [Repository].
 func (l *LocalRepository) GetTodos() ([]*Todo, error) {
-	return l.list.List, nil
+	return slices.Collect(func() iter.Seq[*Todo] {
+		return func(yield func(*Todo) bool) {
+			for _, t := range l.list.List {
+				if !yield(l.cloneTodo(t)) {
+					return
+				}
+			}
+		}
+	}()), nil
+}
+
+func (l *LocalRepository) GetTodoById(id int) (*Todo, error) {
+	for _, todo := range l.list.List {
+		if todo.ID == id {
+			return l.cloneTodo(todo), nil
+		}
+	}
+	return nil, errors.New("todo not found")
 }
 
 // ModifyTodo implements [Repository].
 func (l *LocalRepository) ModifyTodo(id int, todo *Todo) error {
-	panic("unimplemented")
+	index := slices.IndexFunc(l.list.List, func(t *Todo) bool {
+		return t.ID == id
+	})
+	if index == -1 {
+		return errors.New("todo not found")
+	}
+	l.list.List[index] = todo
+	return l.flushToLocal()
 }
 
 // RemoveTodo implements [Repository].
@@ -119,6 +154,16 @@ func (l *LocalRepository) flushToLocal() error {
 	}
 
 	return os.WriteFile(l.dataFile, data, 0644)
+}
+func (l *LocalRepository) cloneTodo(todo *Todo) *Todo {
+	return &Todo{
+		ID:         todo.ID,
+		Content:    todo.Content,
+		CreateTime: todo.CreateTime,
+		FinishTime: todo.FinishTime,
+		Priority:   todo.Priority,
+		Done:       todo.Done,
+	}
 }
 
 var _ Repository = (*LocalRepository)(nil)
