@@ -8,8 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"time"
-	"todo_list/internal/app"
+	"todo_list/internal/setting"
 )
 
 type localTodoList struct {
@@ -23,28 +24,32 @@ type LocalRepository struct {
 	list     *localTodoList
 }
 
-func NewLocalRepository() *LocalRepository {
-	appDataDir, err := os.UserConfigDir()
-	if err != nil {
-		panic(err)
-	}
-
-	todoDataFile := filepath.Join(appDataDir, app.APP_NAME, "todos", "default.json")
-	repository, err := NewLocalRepositoryWithPath(todoDataFile)
-	if err != nil {
-		panic(err)
-	}
-	return repository
+func NewLocalRepositoryWithSetting(st setting.Setting) (*LocalRepository, error) {
+	table := st.Get(setting.KeyRepositoryLocalTable)
+	todoDataFile := filepath.Join(st.AppDataDir(), "todos", table+".json")
+	return newLocalRepository(todoDataFile, table)
 }
 
 func NewLocalRepositoryWithPath(todoDataFile string) (*LocalRepository, error) {
+	return newLocalRepository(todoDataFile, listNameFromDataFile(todoDataFile))
+}
+
+func listNameFromDataFile(todoDataFile string) string {
+	base := filepath.Base(todoDataFile)
+	if ext := filepath.Ext(base); ext != "" {
+		return strings.TrimSuffix(base, ext)
+	}
+	return base
+}
+
+func newLocalRepository(todoDataFile string, listName string) (*LocalRepository, error) {
 	appDataDir := filepath.Dir(todoDataFile)
 	if err := os.MkdirAll(appDataDir, 0755); err != nil {
 		return nil, err
 	}
 
 	todoDataList := &localTodoList{
-		Name: "default",
+		Name: listName,
 		Date: time.Now().String(),
 		List: []*Todo{},
 	}

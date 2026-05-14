@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+	"todo_list/internal/setting"
 )
 
 func newTestRepository(t *testing.T) (*LocalRepository, string) {
@@ -193,6 +194,32 @@ func TestLocalRepository_ClearTodos(t *testing.T) {
 	}
 	if reopened.Size() != 0 {
 		t.Fatalf("reopened Size() = %d, want 0", reopened.Size())
+	}
+}
+
+func TestLocalRepository_WithSetting(t *testing.T) {
+	appDataDir := t.TempDir()
+	path := filepath.Join(appDataDir, "todos", "work.json")
+	st := setting.New(appDataDir)
+	st.Set(setting.KeyRepositoryLocalTable, "work")
+	repo, err := NewLocalRepositoryWithSetting(st)
+	if err != nil {
+		t.Fatalf("NewLocalRepositoryWithSetting() error = %v", err)
+	}
+	if _, err := repo.CreateAndAddTodo("configured", false); err != nil {
+		t.Fatalf("CreateAndAddTodo() error = %v", err)
+	}
+
+	reopened, err := NewLocalRepositoryWithPath(path)
+	if err != nil {
+		t.Fatalf("NewLocalRepositoryWithPath() error = %v", err)
+	}
+	todos, err := reopened.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos() error = %v", err)
+	}
+	if len(todos) != 1 || todos[0].Content != "configured" {
+		t.Fatalf("unexpected todos: %+v", todos)
 	}
 }
 

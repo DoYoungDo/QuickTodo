@@ -1,6 +1,9 @@
 package data
 
-import "sync"
+import (
+	"sync"
+	"todo_list/internal/setting"
+)
 
 type Todo struct {
 	ID         int     `json:"ID"`
@@ -23,5 +26,22 @@ type Repository interface {
 }
 
 var CreateRepository = sync.OnceValue(func() Repository {
-	return NewLocalRepository()
+	st, err := setting.Get()
+	if err != nil {
+		panic(err)
+	}
+	repository, err := NewRepositoryWithSetting(st)
+	if err != nil {
+		panic(err)
+	}
+	return repository
 })
+
+func NewRepositoryWithSetting(st setting.Setting) (Repository, error) {
+	switch st.Get(setting.KeyRepositoryName) {
+	case setting.RepositoryLocal:
+		return NewLocalRepositoryWithSetting(st)
+	default:
+		return NewLocalRepositoryWithSetting(st)
+	}
+}
