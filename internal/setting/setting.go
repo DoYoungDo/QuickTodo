@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"todo_list/internal/app"
 )
@@ -16,11 +17,13 @@ const (
 	RepositoryLocal = "local"
 	DefaultTable    = "default"
 	SettingFileName = "setting.json"
+	HistoryFileName = "history.json"
 )
 
 type Setting struct {
 	appDataDir string
 	values     map[string]string
+	history    map[string][]string
 }
 
 var Get = sync.OnceValues(newSetting)
@@ -31,6 +34,10 @@ func New(appDataDir string) Setting {
 		values: map[string]string{
 			KeyRepositoryName:       RepositoryLocal,
 			KeyRepositoryLocalTable: DefaultTable,
+		},
+		history: map[string][]string{
+			KeyRepositoryName:       {RepositoryLocal},
+			KeyRepositoryLocalTable: {DefaultTable},
 		},
 	}
 }
@@ -57,6 +64,18 @@ func newSettingWithAppDataDir(appDataDir string) (Setting, error) {
 	} else if !os.IsNotExist(err) {
 		return Setting{}, err
 	}
+	historyFile := historyFilePath(appDataDir)
+	if data, err := os.ReadFile(historyFile); err == nil {
+		history := map[string][]string{}
+		if err := json.Unmarshal(data, &history); err != nil {
+			return Setting{}, err
+		}
+		for key, values := range history {
+			st.history[key] = slices.Clone(values)
+		}
+	} else if !os.IsNotExist(err) {
+		return Setting{}, err
+	}
 	return st, st.save()
 }
 
@@ -70,6 +89,7 @@ func (s Setting) Get(key string) string {
 
 func (s Setting) Set(key string, value string) error {
 	s.set(key, value)
+	s.addHistory(key, value)
 	return s.save()
 }
 
@@ -88,6 +108,10 @@ func (s Setting) Values() map[string]string {
 	return values
 }
 
+func (s Setting) History(key string) []string {
+	return slices.Clone(s.history[key])
+}
+
 func (s Setting) save() error {
 	if s.appDataDir == "" {
 		return errors.New("app data dir is empty")
@@ -99,9 +123,34 @@ func (s Setting) save() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(settingFilePath(s.appDataDir), append(data, '\n'), 0644)
+	if err := os.WriteFile(settingFilePath(s.appDataDir), append(data, '\n'), 0644); err != nil {
+		return err
+	}
+	return s.saveHistory()
+}
+
+func (s Setting) addHistory(key string, value string) {
+	if s.history == nil {
+		s.history = map[string][]string{}
+	}
+	if slices.Contains(s.history[key], value) {
+		return
+	}
+	s.history[key] = append(s.history[key], value)
+}
+
+func (s Setting) saveHistory() error {
+	data, err := json.MarshalIndent(s.history, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(historyFilePath(s.appDataDir), append(data, '\n'), 0644)
 }
 
 func settingFilePath(appDataDir string) string {
 	return filepath.Join(appDataDir, SettingFileName)
+}
+
+func historyFilePath(appDataDir string) string {
+	return filepath.Join(appDataDir, HistoryFileName)
 }

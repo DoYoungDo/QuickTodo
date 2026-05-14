@@ -3,6 +3,7 @@ package conf
 import (
 	"io"
 	"slices"
+	"strings"
 	"todo_list/internal/setting"
 	"todo_list/internal/ui"
 )
@@ -15,10 +16,10 @@ func setConfig(out io.Writer, key, value string) error {
 	if err := st.Set(key, value); err != nil {
 		return err
 	}
-	return showConfig(out, map[string]string{key: value}, []string{key})
+	return showConfig(out, map[string]string{key: value}, nil, []string{key})
 }
 
-func listConfig(out io.Writer, keys []string) error {
+func listConfig(out io.Writer, keys []string, showHistory bool) error {
 	st, err := setting.Get()
 	if err != nil {
 		return err
@@ -31,13 +32,20 @@ func listConfig(out io.Writer, keys []string) error {
 		}
 		slices.Sort(keys)
 	}
-	return showConfig(out, values, keys)
+	if !showHistory {
+		return showConfig(out, values, nil, keys)
+	}
+	history := map[string]string{}
+	for _, key := range keys {
+		history[key] = strings.Join(st.History(key), "\n")
+	}
+	return showConfig(out, values, history, keys)
 }
 
-func showConfig(out io.Writer, values map[string]string, keys []string) error {
-	tb := ui.NewConfigTable()
+func showConfig(out io.Writer, values map[string]string, history map[string]string, keys []string) error {
+	tb := ui.NewConfigTableWithHistory(history != nil)
 	for _, key := range keys {
-		tb.AddConfig(key, values[key])
+		tb.AddConfigWithHistory(key, values[key], history[key])
 	}
 	return tb.ShowTo(out)
 }

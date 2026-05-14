@@ -143,6 +143,11 @@ func TestCLIConfCommandParses(t *testing.T) {
 		t.Fatalf("conf set output unexpected: %s", output)
 	}
 
+	output = runQuickTodo(t, configDir, "conf", "set", "REPOSITORY_LOCAL_TABLE", "work")
+	if !strings.Contains(output, "REPOSITORY_LOCAL_TABLE") || !strings.Contains(output, "work") {
+		t.Fatalf("conf set duplicate output unexpected: %s", output)
+	}
+
 	output = runQuickTodo(t, configDir, "conf", "list")
 	if !strings.Contains(output, "REPOSITORY_NAME") || !strings.Contains(output, "REPOSITORY_LOCAL_TABLE") || !strings.Contains(output, "work") {
 		t.Fatalf("conf list output unexpected: %s", output)
@@ -153,5 +158,11 @@ func TestCLIConfCommandParses(t *testing.T) {
 		t.Fatalf("conf list keys output unexpected: %s", output)
 	}
 
-	runQuickTodo(t, configDir, "conf", "his")
+	output = runQuickTodo(t, configDir, "conf", "list", "REPOSITORY_LOCAL_TABLE", "--history")
+	if !strings.Contains(output, "HISTORY") || !strings.Contains(output, "default") || !strings.Contains(output, "work") {
+		t.Fatalf("conf list history output unexpected: %s", output)
+	}
+	if strings.Count(output, "work") != 2 {
+		t.Fatalf("conf list history should dedupe history: %s", output)
+	}
 }

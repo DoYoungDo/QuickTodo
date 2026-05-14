@@ -25,6 +25,9 @@ func TestNewSettingCreatesDefaultSettingFile(t *testing.T) {
 	if _, err := os.Stat(settingFilePath(appDataDir)); err != nil {
 		t.Fatalf("setting file was not created: %v", err)
 	}
+	if _, err := os.Stat(historyFilePath(appDataDir)); err != nil {
+		t.Fatalf("history file was not created: %v", err)
+	}
 }
 
 func TestNewSettingLoadsPersistedSetting(t *testing.T) {
@@ -113,6 +116,43 @@ func TestSetWritesSettingFile(t *testing.T) {
 	}
 	if got["CUSTOM_THEME"] != "dark" {
 		t.Fatalf("CUSTOM_THEME = %q", got["CUSTOM_THEME"])
+	}
+}
+
+func TestSetAppendsHistory(t *testing.T) {
+	appDataDir := t.TempDir()
+	st := New(appDataDir)
+	if err := st.Set(KeyRepositoryLocalTable, "work"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
+	if err := st.Set(KeyRepositoryLocalTable, "work"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
+	if err := st.Set(KeyRepositoryLocalTable, "home"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
+
+	want := []string{DefaultTable, "work", "home"}
+	got := st.History(KeyRepositoryLocalTable)
+	if len(got) != len(want) {
+		t.Fatalf("History() = %v", got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("History() = %v", got)
+		}
+	}
+
+	data, err := os.ReadFile(historyFilePath(appDataDir))
+	if err != nil {
+		t.Fatalf("ReadFile() error = %v", err)
+	}
+	var history map[string][]string
+	if err := json.Unmarshal(data, &history); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+	if len(history[KeyRepositoryLocalTable]) != len(want) || history[KeyRepositoryLocalTable][2] != "home" {
+		t.Fatalf("persisted history = %+v", history)
 	}
 }
 

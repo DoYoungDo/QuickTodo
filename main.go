@@ -75,9 +75,8 @@ func main() {
 		Action(confprocessor.Set)
 	conf.Command("list", "列出配置").
 		Arguments("[key...]", "配置键", nil).
+		Options("--history", "显示配置历史", nil).
 		Action(confprocessor.List)
-	conf.Command("his", "配置历史").
-		Action(confprocessor.History)
 
 	// 根命令 action：todo xxx 等同于 todo add xxx
 	todo.Action(func(ctx *cmd.Context) {

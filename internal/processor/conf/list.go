@@ -12,7 +12,11 @@ func List(ctx *cmd.Context) {
 	for _, arg := range ctx.Args() {
 		keys = append(keys, arg.ForceToString())
 	}
-	if err := listConfig(os.Stdout, keys); err != nil {
+	showHistory := false
+	if val := ctx.Opt("history"); !val.IsEmpty() {
+		showHistory = true
+	}
+	if err := listConfig(os.Stdout, keys, showHistory); err != nil {
 		fmt.Fprintln(os.Stdout, err)
 	}
 }
