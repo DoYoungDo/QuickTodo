@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 	"todo_list/internal/data"
+	"todo_list/internal/ui"
 )
 
 func newProcessorTestRepository(t *testing.T) *data.LocalRepository {
@@ -144,7 +145,7 @@ func TestModifyTodoUpdatesFields(t *testing.T) {
 		t.Fatalf("Content after insert = %q", got.Content)
 	}
 
-	if err := modifyTodo(repo, &out, modifyOptions{index: created.ID, content: "final", done: true, hasPriority: true, priority: 4}); err != nil {
+	if err := modifyTodo(repo, &out, modifyOptions{index: created.ID, content: "final", hasDone: true, done: true, hasPriority: true, priority: 4}); err != nil {
 		t.Fatalf("modifyTodo(update) error = %v", err)
 	}
 	got, _ = repo.GetTodoById(created.ID)
@@ -156,6 +157,30 @@ func TestModifyTodoUpdatesFields(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), "modified") || !strings.Contains(out.String(), "final") {
 		t.Fatalf("output does not include modified result: %s", out.String())
+	}
+}
+
+func TestModifyTodoCanMarkUndone(t *testing.T) {
+	repo := newProcessorTestRepository(t)
+	created, err := repo.CreateAndAddTodo("done", true)
+	if err != nil {
+		t.Fatalf("CreateAndAddTodo() error = %v", err)
+	}
+	var out bytes.Buffer
+
+	if err := modifyTodo(repo, &out, modifyOptions{index: created.ID, hasDone: true, done: false}); err != nil {
+		t.Fatalf("modifyTodo() error = %v", err)
+	}
+
+	got, err := repo.GetTodoById(created.ID)
+	if err != nil {
+		t.Fatalf("GetTodoById() error = %v", err)
+	}
+	if got.Done || got.FinishTime != nil {
+		t.Fatalf("todo should be undone with no finish time: %+v", got)
+	}
+	if !strings.Contains(out.String(), ui.FLAG_NOT_DONE) {
+		t.Fatalf("output should show undone status: %s", out.String())
 	}
 }
 

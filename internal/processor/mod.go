@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 	"todo_list/internal/data"
 
 	cmd "github.com/DoYoungDo/commander-go"
@@ -30,7 +29,7 @@ func Modify(ctx *cmd.Context) {
 		fmt.Println(err)
 		return
 	}
-	oAppend, oInsert, oDone, hasPriority, oPriority := func() (bool, bool, bool, bool, int) {
+	oAppend, oInsert, hasDone, oDone, hasPriority, oPriority := func() (bool, bool, bool, bool, bool, int) {
 		oA := false
 		if opt := ctx.Opt("append"); !opt.IsEmpty() {
 			oA = true
@@ -39,9 +38,13 @@ func Modify(ctx *cmd.Context) {
 		if opt := ctx.Opt("insert"); !opt.IsEmpty() {
 			oI = true
 		}
-		oD := false
+		hd := false
+		oD := true
 		if opt := ctx.Opt("done"); !opt.IsEmpty() {
-			oD = true
+			hd = true
+			if opt.IsBool() {
+				oD = opt.ToBool()
+			}
 		}
 		hasP := false
 		p := 0
@@ -50,13 +53,14 @@ func Modify(ctx *cmd.Context) {
 			p = opt.ToInt()
 		}
 
-		return oA, oI, oD, hasP, p
+		return oA, oI, hd, oD, hasP, p
 	}()
 	if err := modifyTodo(data.CreateRepository(), os.Stdout, modifyOptions{
 		index:       index,
 		content:     content,
 		append:      oAppend,
 		insert:      oInsert,
+		hasDone:     hasDone,
 		done:        oDone,
 		hasPriority: hasPriority,
 		priority:    oPriority,
@@ -70,6 +74,7 @@ type modifyOptions struct {
 	content     string
 	append      bool
 	insert      bool
+	hasDone     bool
 	done        bool
 	hasPriority bool
 	priority    int
@@ -87,10 +92,8 @@ func modifyTodo(repository data.Repository, out io.Writer, opts modifyOptions) e
 	} else if opts.content != "" {
 		todo.Content = opts.content
 	}
-	if opts.done {
+	if opts.hasDone {
 		todo.Done = opts.done
-		timeNow := time.Now().Format(time.RFC3339)
-		todo.FinishTime = &timeNow
 	}
 	if opts.hasPriority {
 		todo.Priority = &opts.priority

@@ -33,7 +33,7 @@ func main() {
 		Arguments("[todo]", "待办内容", nil).
 		Options("-a, --append", "在原内容上追加，append优先于insert", nil).
 		Options("-i, --insert", "在原内容上头插，insert让步于append", nil).
-		Options("-d, --done", "修改为完成状态", nil).
+		Options("-d, --done [done]", "修改完成状态[true|false],默认true", true).
 		Options("-p, --priority <priority>", "设置优先级，取值0-5", nil).
 		Action(processor.Modify)
 
