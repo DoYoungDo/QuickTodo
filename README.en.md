@@ -40,3 +40,5 @@ Examples:
 ```
 
 Running the root command without arguments is equivalent to `list`; passing text directly is equivalent to `add`.
+
+![](README_files/example.jpg)

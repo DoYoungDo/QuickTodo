@@ -40,3 +40,5 @@ Commands:
 ```
 
 根命令没有参数时等价于 `list`；直接传入文本时等价于 `add`。
+
+![](README_files/example.jpg)
