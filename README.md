@@ -1,5 +1,7 @@
 # QuickTodo
 
+中文 | [English](README.en.md)
+
 QuickTodo 是一个使用 Go 编写的终端 Todo CLI，用于快速管理本地待办事项。
 
 默认可执行文件名为 `qtd`。
