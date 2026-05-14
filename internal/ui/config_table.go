@@ -17,6 +17,7 @@ const (
 type ConfigTable struct {
 	table.Writer
 	showHistory bool
+	displayMode string
 }
 
 func NewConfigTable() *ConfigTable {
@@ -49,7 +50,15 @@ func (t *ConfigTable) Show() {
 	_ = t.ShowTo(os.Stdout)
 }
 
+func (t *ConfigTable) SetDisplayMode(mode string) {
+	t.displayMode = mode
+}
+
 func (t *ConfigTable) ShowTo(w io.Writer) error {
+	if t.displayMode == DisplayModeMarkdown {
+		_, err := fmt.Fprintln(w, t.RenderMarkdown())
+		return err
+	}
 	_, err := fmt.Fprintln(w, t.Render())
 	return err
 }

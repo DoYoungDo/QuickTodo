@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"todo_list/internal/data"
-	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -54,7 +53,7 @@ type listOptions struct {
 }
 
 func listTodos(repository data.Repository, out io.Writer, opts listOptions) error {
-	tb := ui.NewTodoTable()
+	tb := newTodoTableWithTitle("list")
 
 	todos, err := repository.GetTodos()
 	if err != nil {

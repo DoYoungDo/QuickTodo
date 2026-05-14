@@ -16,7 +16,7 @@ func setConfig(out io.Writer, key, value string) error {
 	if err := st.Set(key, value); err != nil {
 		return err
 	}
-	return showConfig(out, map[string]string{key: value}, nil, []string{key})
+	return showConfig(out, st, map[string]string{key: value}, nil, []string{key})
 }
 
 func deleteConfig(out io.Writer, keys []string) error {
@@ -27,7 +27,7 @@ func deleteConfig(out io.Writer, keys []string) error {
 	if err := st.Delete(keys...); err != nil {
 		return err
 	}
-	return showConfig(out, st.Values(), nil, keys)
+	return showConfig(out, st, st.Values(), nil, keys)
 }
 
 func listConfig(out io.Writer, keys []string, showHistory bool) error {
@@ -44,17 +44,18 @@ func listConfig(out io.Writer, keys []string, showHistory bool) error {
 		slices.Sort(keys)
 	}
 	if !showHistory {
-		return showConfig(out, values, nil, keys)
+		return showConfig(out, st, values, nil, keys)
 	}
 	history := map[string]string{}
 	for _, key := range keys {
 		history[key] = strings.Join(st.History(key), "\n")
 	}
-	return showConfig(out, values, history, keys)
+	return showConfig(out, st, values, history, keys)
 }
 
-func showConfig(out io.Writer, values map[string]string, history map[string]string, keys []string) error {
+func showConfig(out io.Writer, st setting.Setting, values map[string]string, history map[string]string, keys []string) error {
 	tb := ui.NewConfigTableWithHistory(history != nil)
+	tb.SetDisplayMode(st.Get(setting.KeyDisplayTableMode))
 	for _, key := range keys {
 		tb.AddConfigWithHistory(key, values[key], history[key])
 	}

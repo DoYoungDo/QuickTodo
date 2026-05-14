@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 	"todo_list/internal/data"
-	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -53,7 +52,6 @@ func Modify(ctx *cmd.Context) {
 
 		return oA, oI, oD, hasP, p
 	}()
-
 	if err := modifyTodo(data.CreateRepository(), os.Stdout, modifyOptions{
 		index:       index,
 		content:     content,
@@ -102,7 +100,7 @@ func modifyTodo(repository data.Repository, out io.Writer, opts modifyOptions) e
 		return err
 	}
 
-	tb := ui.NewTodoTableWithTitle("modified")
+	tb := newTodoTableWithTitle("modified")
 	tb.AddTodo(todo)
 	return tb.ShowTo(out)
 }

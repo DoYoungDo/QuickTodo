@@ -12,6 +12,8 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
+const DisplayModeMarkdown = "markdown"
+
 const (
 	FLAG_DONE     = "✅"
 	FLAG_NOT_DONE = "❌"
@@ -28,8 +30,9 @@ const (
 type ToDoTable struct {
 	table.Writer
 
-	todoList []*data.Todo
-	filterBy []table.FilterBy
+	todoList    []*data.Todo
+	filterBy    []table.FilterBy
+	displayMode string
 }
 
 func newTable() table.Writer {
@@ -38,6 +41,7 @@ func newTable() table.Writer {
 	myStyle.Title.Align = text.AlignCenter
 	myStyle.Format.HeaderAlign = text.AlignCenter
 	myStyle.Format.HeaderVAlign = text.VAlignMiddle
+	myStyle.Markdown.PadContent = true
 	myStyle.Options.DrawBorder = true
 	tb.SetStyle(myStyle)
 	return tb
@@ -95,8 +99,15 @@ func (t *ToDoTable) FilterContent(content string, ignoreCase bool) {
 func (t *ToDoTable) Show() {
 	_ = t.ShowTo(os.Stdout)
 }
+func (t *ToDoTable) SetDisplayMode(mode string) {
+	t.displayMode = mode
+}
 func (t *ToDoTable) ShowTo(w io.Writer) error {
 	t.FilterBy(t.filterBy)
+	if t.displayMode == DisplayModeMarkdown {
+		_, err := fmt.Fprintln(w, t.RenderMarkdown())
+		return err
+	}
 	_, err := fmt.Fprintln(w, t.Render())
 	return err
 }

@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 	"todo_list/internal/data"
-	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -40,9 +39,14 @@ func clearTodos(repository data.Repository, out io.Writer, in io.Reader, force b
 	if err != nil {
 		return err
 	}
-	tb := ui.NewTodoTableWithTitle("cleared")
+	tb := newTodoTableWithTitle("cleared")
 	for _, todo := range clearedTodos {
 		tb.AddTodo(todo)
 	}
+	if err := tb.ShowTo(out); err != nil {
+		return err
+	}
+
+	tb = newTodoTableWithTitle("last")
 	return tb.ShowTo(out)
 }

@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"todo_list/internal/data"
-	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -35,7 +34,7 @@ func removeTodos(repository data.Repository, out io.Writer, intIds []int) error 
 	}
 
 	if len(removedTodos) > 0 {
-		tb := ui.NewTodoTableWithTitle("removed")
+		tb := newTodoTableWithTitle("removed")
 		for _, td := range removedTodos {
 			tb.AddTodo(td)
 		}
@@ -49,7 +48,7 @@ func removeTodos(repository data.Repository, out io.Writer, intIds []int) error 
 		if err != nil {
 			return err
 		}
-		tb := ui.NewTodoTableWithTitle("last")
+		tb := newTodoTableWithTitle("last")
 		for _, td := range lastTodos {
 			tb.AddTodo(td)
 		}

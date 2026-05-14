@@ -13,9 +13,12 @@ import (
 const (
 	KeyRepositoryName       = "REPOSITORY_NAME"
 	KeyRepositoryLocalTable = "REPOSITORY_LOCAL_TABLE"
+	KeyDisplayTableMode     = "DISPLAY_TABLE_MODE"
 
-	RepositoryLocal = "local"
-	DefaultTable    = "default"
+	RepositoryLocal         = "local"
+	DefaultTable            = "default"
+	DefaultDisplayTableMode = "table" // table or markdown
+
 	SettingFileName = "setting.json"
 	HistoryFileName = "history.json"
 	HistoryLimit    = 20
@@ -180,5 +183,6 @@ func defaultValues() map[string]string {
 	return map[string]string{
 		KeyRepositoryName:       RepositoryLocal,
 		KeyRepositoryLocalTable: DefaultTable,
+		KeyDisplayTableMode:     DefaultDisplayTableMode,
 	}
 }

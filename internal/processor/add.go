@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"todo_list/internal/data"
-	"todo_list/internal/ui"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -17,7 +16,6 @@ func Add(ctx *cmd.Context) {
 		}
 		return false
 	}()
-
 	contents := make([]string, 0, len(ctx.Args()))
 	for _, ct := range ctx.Args() {
 		contents = append(contents, ct.ForceToString())
@@ -29,7 +27,7 @@ func Add(ctx *cmd.Context) {
 }
 
 func addTodos(repository data.Repository, out io.Writer, contents []string, done bool) error {
-	tb := ui.NewTodoTable()
+	tb := newTodoTableWithTitle("added")
 	failedTodoList := make([]string, 0, len(contents))
 
 	for _, content := range contents {
