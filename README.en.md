@@ -6,6 +6,8 @@ QuickTodo is a terminal Todo CLI written in Go for quickly managing local todo i
 
 The default executable name is `qtd`.
 
+![](README_files/example.jpg)
+
 ## Usage
 
 ```text
@@ -41,4 +43,4 @@ Examples:
 
 Running the root command without arguments is equivalent to `list`; passing text directly is equivalent to `add`.
 
-![](README_files/example.jpg)
+See [CONFIG.md](CONFIG.md) for built-in configuration options.

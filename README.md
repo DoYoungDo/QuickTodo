@@ -6,6 +6,8 @@ QuickTodo 是一个使用 Go 编写的终端 Todo CLI，用于快速管理本地
 
 默认可执行文件名为 `qtd`。
 
+![](README_files/example.jpg)
+
 ## 使用
 
 ```text
@@ -41,4 +43,5 @@ Commands:
 
 根命令没有参数时等价于 `list`；直接传入文本时等价于 `add`。
 
-![](README_files/example.jpg)
+内置配置项说明见 [CONFIG.md](CONFIG.md)。
+
