@@ -152,4 +152,6 @@ func TestCLIConfCommandParses(t *testing.T) {
 	if !strings.Contains(output, "REPOSITORY_LOCAL_TABLE") || !strings.Contains(output, "work") || strings.Contains(output, "REPOSITORY_NAME") {
 		t.Fatalf("conf list keys output unexpected: %s", output)
 	}
+
+	runQuickTodo(t, configDir, "conf", "his")
 }

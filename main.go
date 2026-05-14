@@ -64,7 +64,11 @@ func main() {
 
 	// conf
 	conf := todo.Command("conf", "配置").
-		Action(confprocessor.Conf)
+		Action(func(ctx *cmd.Context) {
+			if err := ctx.Command().Parse([]string{"list"}); err != nil {
+				fmt.Fprintln(os.Stderr, "error:", err)
+			}
+		})
 	conf.Command("set", "设置配置").
 		Arguments("<key>", "配置键", nil).
 		Arguments("<value>", "配置值", nil).
@@ -72,6 +76,8 @@ func main() {
 	conf.Command("list", "列出配置").
 		Arguments("[key...]", "配置键", nil).
 		Action(confprocessor.List)
+	conf.Command("his", "配置历史").
+		Action(confprocessor.History)
 
 	// 根命令 action：todo xxx 等同于 todo add xxx
 	todo.Action(func(ctx *cmd.Context) {
