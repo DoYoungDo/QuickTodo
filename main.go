@@ -13,7 +13,7 @@ import (
 func main() {
 	todo := cmd.New(app.APP_NAME).
 		Version(app.APP_VERSION).
-		Description("todo list").
+		Description("QuickTodo 是一个用于快速管理本地待办事项的终端 Todo CLI。支持添加、查看、修改、完成、删除和清空待办事项，并提供本地配置管理能力。").
 		Arguments("[todo...]", "待办项", nil)
 
 	// add

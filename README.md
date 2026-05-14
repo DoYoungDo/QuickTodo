@@ -1,91 +1,40 @@
 # QuickTodo
 
-QuickTodo 是一个使用 Go 编写的终端 Todo CLI。它支持在命令行中快速添加、查看、修改和删除待办事项，并将数据持久化到本地 JSON 文件。
+QuickTodo 是一个使用 Go 编写的终端 Todo CLI，用于快速管理本地待办事项。
 
-## 使用示例
+默认可执行文件名为 `qtd`。
 
-添加待办：
+## 使用
+
+```text
+Usage: QuickTodo [options] [command] [todo...]
+
+QuickTodo 是一个用于快速管理本地待办事项的终端 Todo CLI。支持添加、查看、修改、完成、删除和清空待办事项，并提供本地配置管理能力。
+
+Arguments:
+  todo  待办项
+
+Options:
+  -h, --help     display help for command
+  -V, --version  output the version number
+
+Commands:
+  add [options] <todo...>       添加 待办项
+  rm <index...>                 删除 待办项
+  mod [options] <index> [todo]  修改 待办项
+  list [options]                显示 待办项
+  done <index...>               完成 待办项，等价于：mod <index> -d
+  clear [options]               清空 待办项
+  conf                          配置
+```
+
+示例：
 
 ```sh
 ./qtd add "write README"
-./qtd add "ship release" "add tests"
-```
-
-添加时标记为完成：
-
-```sh
-./qtd add "already done" -d
-```
-
-列出待办：
-
-```sh
 ./qtd list
-```
-
-按内容过滤：
-
-```sh
-./qtd list -f readme -i
-```
-
-按 ID 范围过滤：
-
-```sh
-./qtd list -b 0 -e 3
-```
-
-修改内容：
-
-```sh
 ./qtd mod 0 "update README"
-```
-
-追加或前插内容：
-
-```sh
-./qtd mod 0 " today" --append
-./qtd mod 0 "urgent: " --insert
-```
-
-标记完成或设置优先级：
-
-```sh
-./qtd mod 0 -d
-./qtd mod 0 -p 3
 ./qtd done 0
-./qtd done 0 1 2
 ```
 
-删除待办：
-
-```sh
-./qtd rm 0
-./qtd rm 0 1 2
-```
-
-清空全部待办：
-
-```sh
-./qtd clear
-./qtd clear -f
-```
-
-`clear` 默认会先提示确认；使用 `-f` 或 `--force` 会跳过确认并直接清空。
-
-根命令没有参数时等价于 `list`；直接传入文本时等价于 `add`：
-
-```sh
-./qtd
-./qtd "quick task"
-```
-
-## 数据存储
-
-默认数据文件位于：
-
-```text
-os.UserConfigDir()/QuickTodo/todos/default.json
-```
-
-该路径由运行系统决定，例如 macOS 通常位于用户配置目录下。手工验证命令会写入真实数据文件，测试代码使用临时目录隔离。
+根命令没有参数时等价于 `list`；直接传入文本时等价于 `add`。
