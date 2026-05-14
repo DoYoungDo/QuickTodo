@@ -2,6 +2,7 @@ package setting
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
 )
@@ -153,6 +154,23 @@ func TestSetAppendsHistory(t *testing.T) {
 	}
 	if len(history[KeyRepositoryLocalTable]) != len(want) || history[KeyRepositoryLocalTable][2] != "home" {
 		t.Fatalf("persisted history = %+v", history)
+	}
+}
+
+func TestSetTrimsHistoryToLimit(t *testing.T) {
+	st := New(t.TempDir())
+	for i := 0; i < HistoryLimit+5; i++ {
+		if err := st.Set("CUSTOM", fmt.Sprintf("value-%02d", i)); err != nil {
+			t.Fatalf("Set() error = %v", err)
+		}
+	}
+
+	got := st.History("CUSTOM")
+	if len(got) != HistoryLimit {
+		t.Fatalf("History() length = %d, want %d: %v", len(got), HistoryLimit, got)
+	}
+	if got[0] != "value-05" || got[len(got)-1] != "value-24" {
+		t.Fatalf("History() was not trimmed to latest values: %v", got)
 	}
 }
 

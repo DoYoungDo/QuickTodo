@@ -18,6 +18,7 @@ const (
 	DefaultTable    = "default"
 	SettingFileName = "setting.json"
 	HistoryFileName = "history.json"
+	HistoryLimit    = 20
 )
 
 type Setting struct {
@@ -137,6 +138,9 @@ func (s Setting) addHistory(key string, value string) {
 		return
 	}
 	s.history[key] = append(s.history[key], value)
+	if len(s.history[key]) > HistoryLimit {
+		s.history[key] = s.history[key][len(s.history[key])-HistoryLimit:]
+	}
 }
 
 func (s Setting) saveHistory() error {
