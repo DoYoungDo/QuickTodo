@@ -19,6 +19,8 @@ func Remove(ctx *cmd.Context) {
 		}
 	}
 	if len(intIds) == 0 {
+		fmt.Println("rm requires todos")
+		fmt.Println("Usage: rm <todo-id> [todo-id...]")
 		return
 	}
 	if err := removeTodos(data.CreateRepository(), os.Stdout, intIds); err != nil {
