@@ -73,6 +73,9 @@ func main() {
 		Arguments("<key>", "配置键", nil).
 		Arguments("<value>", "配置值", nil).
 		Action(confprocessor.Set)
+	conf.Command("del", "删除配置").
+		Arguments("<key...>", "配置键", nil).
+		Action(confprocessor.Delete)
 	conf.Command("list", "列出配置").
 		Arguments("[key...]", "配置键", nil).
 		Options("--history", "显示配置历史", nil).

@@ -19,6 +19,17 @@ func setConfig(out io.Writer, key, value string) error {
 	return showConfig(out, map[string]string{key: value}, nil, []string{key})
 }
 
+func deleteConfig(out io.Writer, keys []string) error {
+	st, err := setting.Get()
+	if err != nil {
+		return err
+	}
+	if err := st.Delete(keys...); err != nil {
+		return err
+	}
+	return showConfig(out, st.Values(), nil, keys)
+}
+
 func listConfig(out io.Writer, keys []string, showHistory bool) error {
 	st, err := setting.Get()
 	if err != nil {

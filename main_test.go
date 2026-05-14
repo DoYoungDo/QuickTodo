@@ -165,4 +165,27 @@ func TestCLIConfCommandParses(t *testing.T) {
 	if strings.Count(output, "work") != 2 {
 		t.Fatalf("conf list history should dedupe history: %s", output)
 	}
+
+	output = runQuickTodo(t, configDir, "conf", "set", "CUSTOM_THEME", "dark")
+	if !strings.Contains(output, "CUSTOM_THEME") || !strings.Contains(output, "dark") {
+		t.Fatalf("conf set custom output unexpected: %s", output)
+	}
+
+	output = runQuickTodo(t, configDir, "conf", "del", "CUSTOM_THEME")
+	if strings.Contains(output, "dark") {
+		t.Fatalf("conf del custom output unexpected: %s", output)
+	}
+	output = runQuickTodo(t, configDir, "conf", "list", "CUSTOM_THEME", "--history")
+	if strings.Contains(output, "dark") {
+		t.Fatalf("conf del custom should remove history: %s", output)
+	}
+
+	output = runQuickTodo(t, configDir, "conf", "del", "REPOSITORY_LOCAL_TABLE")
+	if !strings.Contains(output, "REPOSITORY_LOCAL_TABLE") || !strings.Contains(output, "default") || strings.Contains(output, "work") {
+		t.Fatalf("conf del built-in output unexpected: %s", output)
+	}
+	output = runQuickTodo(t, configDir, "conf", "list", "REPOSITORY_LOCAL_TABLE", "--history")
+	if strings.Contains(output, "work") || strings.Count(output, "default") != 1 {
+		t.Fatalf("conf del built-in should clear history: %s", output)
+	}
 }

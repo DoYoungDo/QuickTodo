@@ -32,10 +32,7 @@ var Get = sync.OnceValues(newSetting)
 func New(appDataDir string) Setting {
 	return Setting{
 		appDataDir: appDataDir,
-		values: map[string]string{
-			KeyRepositoryName:       RepositoryLocal,
-			KeyRepositoryLocalTable: DefaultTable,
-		},
+		values:     defaultValues(),
 		history: map[string][]string{
 			KeyRepositoryName:       {RepositoryLocal},
 			KeyRepositoryLocalTable: {DefaultTable},
@@ -94,6 +91,19 @@ func (s Setting) Set(key string, value string) error {
 	return s.save()
 }
 
+func (s Setting) Delete(keys ...string) error {
+	for _, key := range keys {
+		if value, ok := defaultValues()[key]; ok {
+			s.set(key, value)
+			s.clearHistory(key)
+			continue
+		}
+		delete(s.values, key)
+		delete(s.history, key)
+	}
+	return s.save()
+}
+
 func (s Setting) set(key string, value string) {
 	if s.values == nil {
 		s.values = map[string]string{}
@@ -143,6 +153,13 @@ func (s Setting) addHistory(key string, value string) {
 	}
 }
 
+func (s Setting) clearHistory(key string) {
+	if s.history == nil {
+		s.history = map[string][]string{}
+	}
+	s.history[key] = []string{}
+}
+
 func (s Setting) saveHistory() error {
 	data, err := json.MarshalIndent(s.history, "", "  ")
 	if err != nil {
@@ -157,4 +174,11 @@ func settingFilePath(appDataDir string) string {
 
 func historyFilePath(appDataDir string) string {
 	return filepath.Join(appDataDir, HistoryFileName)
+}
+
+func defaultValues() map[string]string {
+	return map[string]string{
+		KeyRepositoryName:       RepositoryLocal,
+		KeyRepositoryLocalTable: DefaultTable,
+	}
 }

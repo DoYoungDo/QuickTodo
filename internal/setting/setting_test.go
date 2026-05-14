@@ -174,6 +174,41 @@ func TestSetTrimsHistoryToLimit(t *testing.T) {
 	}
 }
 
+func TestDeleteRemovesCustomSettingAndHistory(t *testing.T) {
+	appDataDir := t.TempDir()
+	st := New(appDataDir)
+	if err := st.Set("CUSTOM", "value"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
+	if err := st.Delete("CUSTOM"); err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+
+	if st.Get("CUSTOM") != "" {
+		t.Fatalf("CUSTOM should be deleted: %+v", st.Values())
+	}
+	if len(st.History("CUSTOM")) != 0 {
+		t.Fatalf("CUSTOM history should be deleted: %v", st.History("CUSTOM"))
+	}
+}
+
+func TestDeleteResetsBuiltInSettingAndClearsHistory(t *testing.T) {
+	st := New(t.TempDir())
+	if err := st.Set(KeyRepositoryLocalTable, "work"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
+	if err := st.Delete(KeyRepositoryLocalTable); err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+
+	if st.Get(KeyRepositoryLocalTable) != DefaultTable {
+		t.Fatalf("%s = %q", KeyRepositoryLocalTable, st.Get(KeyRepositoryLocalTable))
+	}
+	if history := st.History(KeyRepositoryLocalTable); len(history) != 0 {
+		t.Fatalf("built-in history should be cleared: %v", history)
+	}
+}
+
 func TestGetReturnsSingletonSetting(t *testing.T) {
 	st, err := Get()
 	if err != nil {
