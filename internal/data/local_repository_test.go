@@ -52,7 +52,7 @@ func TestLocalRepository_GetTodosReturnsClones(t *testing.T) {
 	}
 	priority := 3
 	created.Priority = &priority
-	if err := repo.ModifyTodo(created.ID, created); err != nil {
+	if err := repo.ModifyTodo(created.ID, *created); err != nil {
 		t.Fatalf("ModifyTodo() error = %v", err)
 	}
 
@@ -105,7 +105,7 @@ func TestLocalRepository_ModifyTodoPersistsChanges(t *testing.T) {
 	todo.Priority = &priority
 	now := time.Now().Format(time.RFC3339)
 	todo.FinishTime = &now
-	if err := repo.ModifyTodo(todo.ID, todo); err != nil {
+	if err := repo.ModifyTodo(todo.ID, *todo); err != nil {
 		t.Fatalf("ModifyTodo() error = %v", err)
 	}
 
@@ -124,7 +124,7 @@ func TestLocalRepository_ModifyTodoPersistsChanges(t *testing.T) {
 
 func TestLocalRepository_ModifyTodoMissing(t *testing.T) {
 	repo, _ := newTestRepository(t)
-	if err := repo.ModifyTodo(999, &Todo{ID: 999, Content: "missing"}); err == nil {
+	if err := repo.ModifyTodo(999, Todo{ID: 999, Content: "missing"}); err == nil {
 		t.Fatal("ModifyTodo() expected error for missing id")
 	}
 }

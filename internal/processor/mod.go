@@ -98,7 +98,7 @@ func modifyTodo(repository data.Repository, out io.Writer, opts modifyOptions) e
 		todo.Priority = &opts.priority
 	}
 
-	if err := repository.ModifyTodo(todo.ID, todo); err != nil {
+	if err := repository.ModifyTodo(todo.ID, *todo); err != nil {
 		return err
 	}
 

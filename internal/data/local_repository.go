@@ -121,14 +121,31 @@ func (l *LocalRepository) GetTodoById(id int) (*Todo, error) {
 }
 
 // ModifyTodo implements [Repository].
-func (l *LocalRepository) ModifyTodo(id int, todo *Todo) error {
+func (l *LocalRepository) ModifyTodo(id int, todo Todo) error {
 	index := slices.IndexFunc(l.list.List, func(t *Todo) bool {
 		return t.ID == id
 	})
 	if index == -1 {
 		return errors.New("todo not found")
 	}
-	l.list.List[index] = l.cloneTodo(todo)
+	l.list.List[index] = func() *Todo {
+		newTodo := l.cloneTodo(l.list.List[index])
+		newTodo.Content = todo.Content
+		newTodo.Priority = todo.Priority
+
+		if newTodo.Done != todo.Done {
+			newTodo.Done = todo.Done
+
+			if todo.Done {
+				timeNow := time.Now().Format(time.RFC3339)
+				newTodo.FinishTime = &timeNow
+			} else {
+				newTodo.FinishTime = nil
+			}
+		}
+
+		return newTodo
+	}()
 	return l.flushToLocal()
 }
 
