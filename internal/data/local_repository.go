@@ -180,7 +180,10 @@ func (l *LocalRepository) RemoveTodos(ids []int) ([]*Todo, error) {
 func (l *LocalRepository) ClearTodos() ([]*Todo, error) {
 	clearedTodos := l.list.List
 	l.list.List = []*Todo{}
-	return clearedTodos, l.flushToLocal()
+	if err := os.Remove(l.dataFile); err != nil && !os.IsNotExist(err) {
+		return nil, err
+	}
+	return clearedTodos, nil
 }
 
 func (l *LocalRepository) Size() int {

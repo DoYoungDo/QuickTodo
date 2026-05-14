@@ -110,8 +110,8 @@ func TestCLIEndToEndTodoFlow(t *testing.T) {
 	if runtime.GOOS != "darwin" {
 		dataFile = filepath.Join(configDir, "QuickTodo", "todos", "default.json")
 	}
-	if _, err := os.Stat(dataFile); err != nil {
-		t.Fatalf("expected data file at %s: %v", dataFile, err)
+	if _, err := os.Stat(dataFile); !os.IsNotExist(err) {
+		t.Fatalf("expected data file to be deleted at %s: %v", dataFile, err)
 	}
 }
 

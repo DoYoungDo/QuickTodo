@@ -187,6 +187,9 @@ func TestLocalRepository_ClearTodos(t *testing.T) {
 	if repo.Size() != 0 {
 		t.Fatalf("Size() = %d, want 0", repo.Size())
 	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("data file should be deleted after clear: %v", err)
+	}
 
 	reopened, err := NewLocalRepositoryWithPath(path)
 	if err != nil {
