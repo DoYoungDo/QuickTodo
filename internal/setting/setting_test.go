@@ -30,10 +30,11 @@ func TestNewSettingCreatesDefaultSettingFile(t *testing.T) {
 func TestNewSettingLoadsPersistedSetting(t *testing.T) {
 	appDataDir := t.TempDir()
 	st := New(appDataDir)
-	st.Set(KeyRepositoryLocalTable, "work")
-	st.Set("CUSTOM_THEME", "light")
-	if err := st.Save(); err != nil {
-		t.Fatalf("Save() error = %v", err)
+	if err := st.Set(KeyRepositoryLocalTable, "work"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
+	if err := st.Set("CUSTOM_THEME", "light"); err != nil {
+		t.Fatalf("Set() error = %v", err)
 	}
 
 	loaded, err := newSettingWithAppDataDir(appDataDir)
@@ -48,7 +49,7 @@ func TestNewSettingLoadsPersistedSetting(t *testing.T) {
 	}
 }
 
-func TestNewSettingFillsMissingDefaults(t *testing.T) {
+func TestNewSettingKeepsDefaultsWhenPersistedSettingIsPartial(t *testing.T) {
 	appDataDir := t.TempDir()
 	if err := os.MkdirAll(appDataDir, 0755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
@@ -62,7 +63,7 @@ func TestNewSettingFillsMissingDefaults(t *testing.T) {
 		t.Fatalf("newSettingWithAppDataDir() error = %v", err)
 	}
 	if st.Get(KeyRepositoryName) != RepositoryLocal || st.Get(KeyRepositoryLocalTable) != DefaultTable || st.Get("CUSTOM") != "value" {
-		t.Fatalf("defaults were not filled: %+v", st.Values())
+		t.Fatalf("defaults were not kept: %+v", st.Values())
 	}
 }
 
@@ -82,7 +83,9 @@ func TestNewSettingReturnsInvalidJSONError(t *testing.T) {
 
 func TestSetGetAndValues(t *testing.T) {
 	st := New(t.TempDir())
-	st.Set("FOO", "bar")
+	if err := st.Set("FOO", "bar"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
 	if st.Get("FOO") != "bar" {
 		t.Fatalf("FOO = %q", st.Get("FOO"))
 	}
@@ -93,12 +96,11 @@ func TestSetGetAndValues(t *testing.T) {
 	}
 }
 
-func TestSaveWritesSettingFile(t *testing.T) {
+func TestSetWritesSettingFile(t *testing.T) {
 	appDataDir := t.TempDir()
 	st := New(appDataDir)
-	st.Set("CUSTOM_THEME", "dark")
-	if err := st.Save(); err != nil {
-		t.Fatalf("Save() error = %v", err)
+	if err := st.Set("CUSTOM_THEME", "dark"); err != nil {
+		t.Fatalf("Set() error = %v", err)
 	}
 
 	data, err := os.ReadFile(settingFilePath(appDataDir))

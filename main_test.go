@@ -129,3 +129,27 @@ func TestCLIRootCommandShortcuts(t *testing.T) {
 	}
 
 }
+
+func TestCLIConfCommandParses(t *testing.T) {
+	configDir := t.TempDir()
+
+	output := runQuickTodo(t, configDir, "conf")
+	if !strings.Contains(output, "REPOSITORY_NAME") || !strings.Contains(output, "local") {
+		t.Fatalf("conf output unexpected: %s", output)
+	}
+
+	output = runQuickTodo(t, configDir, "conf", "set", "REPOSITORY_LOCAL_TABLE", "work")
+	if !strings.Contains(output, "REPOSITORY_LOCAL_TABLE") || !strings.Contains(output, "work") {
+		t.Fatalf("conf set output unexpected: %s", output)
+	}
+
+	output = runQuickTodo(t, configDir, "conf", "list")
+	if !strings.Contains(output, "REPOSITORY_NAME") || !strings.Contains(output, "REPOSITORY_LOCAL_TABLE") || !strings.Contains(output, "work") {
+		t.Fatalf("conf list output unexpected: %s", output)
+	}
+
+	output = runQuickTodo(t, configDir, "conf", "list", "REPOSITORY_LOCAL_TABLE")
+	if !strings.Contains(output, "REPOSITORY_LOCAL_TABLE") || !strings.Contains(output, "work") || strings.Contains(output, "REPOSITORY_NAME") {
+		t.Fatalf("conf list keys output unexpected: %s", output)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"todo_list/internal/app"
 	"todo_list/internal/processor"
+	confprocessor "todo_list/internal/processor/conf"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
@@ -60,6 +61,17 @@ func main() {
 	todo.Command("clear", "清空 待办项").
 		Options("-f, --force", "不弹出确认，强制清空", nil).
 		Action(processor.Clear)
+
+	// conf
+	conf := todo.Command("conf", "配置").
+		Action(confprocessor.Conf)
+	conf.Command("set", "设置配置").
+		Arguments("<key>", "配置键", nil).
+		Arguments("<value>", "配置值", nil).
+		Action(confprocessor.Set)
+	conf.Command("list", "列出配置").
+		Arguments("[key...]", "配置键", nil).
+		Action(confprocessor.List)
 
 	// 根命令 action：todo xxx 等同于 todo add xxx
 	todo.Action(func(ctx *cmd.Context) {

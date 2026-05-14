@@ -47,16 +47,17 @@ func newSettingWithAppDataDir(appDataDir string) (Setting, error) {
 	st := New(appDataDir)
 	settingFile := settingFilePath(appDataDir)
 	if data, err := os.ReadFile(settingFile); err == nil {
-		values, err := parseValues(data)
-		if err != nil {
+		values := map[string]string{}
+		if err := json.Unmarshal(data, &values); err != nil {
 			return Setting{}, err
 		}
-		st.values = values
+		for key, value := range values {
+			st.set(key, value)
+		}
 	} else if !os.IsNotExist(err) {
 		return Setting{}, err
 	}
-	st.fillDefaults()
-	return st, st.Save()
+	return st, st.save()
 }
 
 func (s Setting) AppDataDir() string {
@@ -67,7 +68,12 @@ func (s Setting) Get(key string) string {
 	return s.values[key]
 }
 
-func (s Setting) Set(key string, value string) {
+func (s Setting) Set(key string, value string) error {
+	s.set(key, value)
+	return s.save()
+}
+
+func (s Setting) set(key string, value string) {
 	if s.values == nil {
 		s.values = map[string]string{}
 	}
@@ -82,7 +88,7 @@ func (s Setting) Values() map[string]string {
 	return values
 }
 
-func (s Setting) Save() error {
+func (s Setting) save() error {
 	if s.appDataDir == "" {
 		return errors.New("app data dir is empty")
 	}
@@ -96,63 +102,6 @@ func (s Setting) Save() error {
 	return os.WriteFile(settingFilePath(s.appDataDir), append(data, '\n'), 0644)
 }
 
-func (s Setting) fillDefaults() {
-	if s.values == nil {
-		s.values = map[string]string{}
-	}
-	if s.values[KeyRepositoryName] == "" {
-		s.values[KeyRepositoryName] = RepositoryLocal
-	}
-	if s.values[KeyRepositoryLocalTable] == "" {
-		s.values[KeyRepositoryLocalTable] = DefaultTable
-	}
-}
-
 func settingFilePath(appDataDir string) string {
 	return filepath.Join(appDataDir, SettingFileName)
-}
-
-func parseValues(data []byte) (map[string]string, error) {
-	values := map[string]string{}
-	if err := json.Unmarshal(data, &values); err == nil {
-		return values, nil
-	}
-
-	var legacy map[string]any
-	if err := json.Unmarshal(data, &legacy); err != nil {
-		return nil, err
-	}
-	if repository, ok := legacy["repository"].(string); ok {
-		values[KeyRepositoryName] = repository
-	} else if repository, ok := legacy["repository"].(map[string]any); ok {
-		if mode, ok := repository["repository_mode"].(string); ok {
-			values[KeyRepositoryName] = mode
-		}
-		if local, ok := repository["local"].(map[string]any); ok {
-			if dataFile, ok := local["dataFile"].(string); ok && dataFile != "" {
-				values[KeyRepositoryLocalTable] = listNameFromDataFile(dataFile)
-			}
-		}
-	}
-	if repositories, ok := legacy["repositories"].(map[string]any); ok {
-		if local, ok := repositories[RepositoryLocal].(map[string]any); ok {
-			if listName, ok := local["listName"].(string); ok {
-				values[KeyRepositoryLocalTable] = listName
-			}
-		}
-	}
-	for key, value := range legacy {
-		if text, ok := value.(string); ok {
-			values[key] = text
-		}
-	}
-	return values, nil
-}
-
-func listNameFromDataFile(dataFile string) string {
-	base := filepath.Base(dataFile)
-	if ext := filepath.Ext(base); ext != "" {
-		return base[:len(base)-len(ext)]
-	}
-	return base
 }
