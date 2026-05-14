@@ -185,7 +185,7 @@ func TestCLIConfCommandParses(t *testing.T) {
 		t.Fatalf("conf del built-in output unexpected: %s", output)
 	}
 	output = runQuickTodo(t, configDir, "conf", "list", "REPOSITORY_LOCAL_TABLE", "--history")
-	if strings.Contains(output, "work") || strings.Count(output, "default") != 1 {
-		t.Fatalf("conf del built-in should clear history: %s", output)
+	if strings.Contains(output, "work") || strings.Count(output, "default") != 2 {
+		t.Fatalf("conf del built-in should reset history: %s", output)
 	}
 }

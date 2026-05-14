@@ -192,7 +192,7 @@ func TestDeleteRemovesCustomSettingAndHistory(t *testing.T) {
 	}
 }
 
-func TestDeleteResetsBuiltInSettingAndClearsHistory(t *testing.T) {
+func TestDeleteResetsBuiltInSettingAndHistory(t *testing.T) {
 	st := New(t.TempDir())
 	if err := st.Set(KeyRepositoryLocalTable, "work"); err != nil {
 		t.Fatalf("Set() error = %v", err)
@@ -204,8 +204,27 @@ func TestDeleteResetsBuiltInSettingAndClearsHistory(t *testing.T) {
 	if st.Get(KeyRepositoryLocalTable) != DefaultTable {
 		t.Fatalf("%s = %q", KeyRepositoryLocalTable, st.Get(KeyRepositoryLocalTable))
 	}
-	if history := st.History(KeyRepositoryLocalTable); len(history) != 0 {
-		t.Fatalf("built-in history should be cleared: %v", history)
+	want := []string{DefaultTable}
+	if history := st.History(KeyRepositoryLocalTable); len(history) != len(want) || history[0] != want[0] {
+		t.Fatalf("built-in history should be reset: %v", history)
+	}
+}
+
+func TestDeleteResetsDisplayModeAndHistory(t *testing.T) {
+	st := New(t.TempDir())
+	if err := st.Set(KeyDisplayTableMode, "markdown"); err != nil {
+		t.Fatalf("Set() error = %v", err)
+	}
+	if err := st.Delete(KeyDisplayTableMode); err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+
+	if st.Get(KeyDisplayTableMode) != DefaultDisplayTableMode {
+		t.Fatalf("%s = %q", KeyDisplayTableMode, st.Get(KeyDisplayTableMode))
+	}
+	want := []string{DefaultDisplayTableMode}
+	if history := st.History(KeyDisplayTableMode); len(history) != len(want) || history[0] != want[0] {
+		t.Fatalf("display mode history should be reset: %v", history)
 	}
 }
 

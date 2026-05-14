@@ -36,10 +36,7 @@ func New(appDataDir string) Setting {
 	return Setting{
 		appDataDir: appDataDir,
 		values:     defaultValues(),
-		history: map[string][]string{
-			KeyRepositoryName:       {RepositoryLocal},
-			KeyRepositoryLocalTable: {DefaultTable},
-		},
+		history:    defaultHistories(),
 	}
 }
 
@@ -95,10 +92,15 @@ func (s Setting) Set(key string, value string) error {
 }
 
 func (s Setting) Delete(keys ...string) error {
+	dv := defaultValues()
+	dh := defaultHistories()
 	for _, key := range keys {
-		if value, ok := defaultValues()[key]; ok {
+		if value, ok := dv[key]; ok {
 			s.set(key, value)
 			s.clearHistory(key)
+			if history, ok := dh[key]; ok {
+				s.history[key] = slices.Clone(history)
+			}
 			continue
 		}
 		delete(s.values, key)
@@ -184,5 +186,12 @@ func defaultValues() map[string]string {
 		KeyRepositoryName:       RepositoryLocal,
 		KeyRepositoryLocalTable: DefaultTable,
 		KeyDisplayTableMode:     DefaultDisplayTableMode,
+	}
+}
+func defaultHistories() map[string][]string {
+	return map[string][]string{
+		KeyRepositoryName:       {RepositoryLocal},
+		KeyRepositoryLocalTable: {DefaultTable},
+		KeyDisplayTableMode:     {DefaultDisplayTableMode},
 	}
 }
