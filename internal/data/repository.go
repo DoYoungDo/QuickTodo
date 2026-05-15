@@ -19,7 +19,7 @@ type Repository interface {
 	AddTodos([]*Todo) ([]*Todo, error)
 	GetTodos() ([]*Todo, error)
 	GetTodoById(id int) (*Todo, error)
-	ModifyTodo(id int, todo Todo) error
+	ModifyTodo(id int, todo Todo) (*Todo, error)
 	RemoveTodos(ids []int) ([]*Todo, error)
 	ClearTodos() ([]*Todo, error)
 	Size() int

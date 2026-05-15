@@ -3,7 +3,7 @@ module todo_list
 go 1.26.0
 
 require (
-	github.com/DoYoungDo/commander-go v0.0.16
+	github.com/DoYoungDo/commander-go v0.0.17
 	github.com/jedib0t/go-pretty/v6 v6.7.10
 )
 

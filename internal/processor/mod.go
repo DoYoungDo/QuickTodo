@@ -99,11 +99,12 @@ func modifyTodo(repository data.Repository, out io.Writer, opts modifyOptions) e
 		todo.Priority = &opts.priority
 	}
 
-	if err := repository.ModifyTodo(todo.ID, *todo); err != nil {
+	modTodo, err := repository.ModifyTodo(todo.ID, *todo)
+	if err != nil {
 		return err
 	}
 
 	tb := newTodoTableWithTitle("modified")
-	tb.AddTodo(todo)
+	tb.AddTodo(modTodo)
 	return tb.ShowTo(out)
 }
