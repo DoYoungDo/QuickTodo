@@ -11,10 +11,15 @@ import (
 
 func List(ctx *cmd.Context) {
 	hasDone, done, filter, ignoreCase, begin, end := func() (bool, bool, string, bool, int, int) {
-		hd, d, f, i, b, e := false, false, "", false, 0, -1
-		if val := ctx.Opt("done"); !val.IsEmpty() && val.IsBool() && val.ToBool() {
-			hd, d = true, true
+		hd, d := false, true
+		if val := ctx.Opt("done"); !val.IsEmpty() {
+			hd = true
+			if val.IsBool() {
+				d = val.ToBool()
+			}
 		}
+
+		f, i, b, e := "", false, 0, -1
 		if val := ctx.Opt("filter"); !val.IsEmpty() {
 			f = val.ForceToString()
 		}
