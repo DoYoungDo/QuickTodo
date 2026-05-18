@@ -131,12 +131,13 @@ func (l *LocalRepository) ModifyTodo(id int, todo Todo) (*Todo, error) {
 	l.list.List[index] = func() *Todo {
 		newTodo := l.cloneTodo(l.list.List[index])
 		newTodo.Content = todo.Content
+		newTodo.CreateTime = todo.CreateTime
 		newTodo.Priority = todo.Priority
 
 		if newTodo.Done != todo.Done {
 			newTodo.Done = todo.Done
 
-			if todo.Done {
+			if todo.Done && todo.FinishTime == nil {
 				timeNow := time.Now().Format(time.RFC3339)
 				newTodo.FinishTime = &timeNow
 			} else {
