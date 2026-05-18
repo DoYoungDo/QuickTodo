@@ -137,9 +137,13 @@ func (l *LocalRepository) ModifyTodo(id int, todo Todo) (*Todo, error) {
 		if newTodo.Done != todo.Done {
 			newTodo.Done = todo.Done
 
-			if todo.Done && todo.FinishTime == nil {
-				timeNow := time.Now().Format(time.RFC3339)
-				newTodo.FinishTime = &timeNow
+			if todo.Done {
+				if todo.FinishTime == nil {
+					timeNow := time.Now().Format(time.RFC3339)
+					newTodo.FinishTime = &timeNow
+				} else {
+					newTodo.FinishTime = todo.FinishTime
+				}
 			} else {
 				newTodo.FinishTime = nil
 			}
