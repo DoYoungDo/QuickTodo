@@ -62,6 +62,11 @@ func main() {
 		Options("-f, --force", "不弹出确认，强制清空", nil).
 		Action(processor.Clear)
 
+	todo.Command("mv", "移动 待办项").
+		Arguments("<index>", "索引序号", nil).
+		Arguments("<distIndex>", "目标索引", nil).
+		Action(processor.Move)
+
 	// conf
 	conf := todo.Command("conf", "配置").
 		Action(func(ctx *cmd.Context) {
