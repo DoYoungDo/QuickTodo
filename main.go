@@ -24,12 +24,12 @@ func main() {
 
 	// rm
 	todo.Command("rm", "删除 待办项").
-		Arguments("<index...>", "索引序号", nil).
+		Arguments("<id...>", "索引序号", nil).
 		Action(processor.Remove)
 
 	// mod
 	todo.Command("mod", "修改 待办项").
-		Arguments("<index>", "索引序号", nil).
+		Arguments("<id>", "索引序号", nil).
 		Arguments("[todo]", "待办内容", nil).
 		Options("-a, --append", "在原内容上追加，append优先于insert", nil).
 		Options("-i, --insert", "在原内容上头插，insert让步于append", nil).
@@ -47,8 +47,8 @@ func main() {
 		Action(processor.List)
 
 	// done
-	todo.Command("done", "完成 待办项，等价于：mod <index> -d").
-		Arguments("<index...>", "索引序号", nil).
+	todo.Command("done", "完成 待办项，等价于：mod <id> -d").
+		Arguments("<id...>", "索引序号", nil).
 		Action(func(ctx *cmd.Context) {
 			for _, arg := range ctx.Args() {
 				if err := todo.Parse([]string{"mod", arg.ForceToString(), "-d"}); err != nil {
@@ -63,8 +63,8 @@ func main() {
 		Action(processor.Clear)
 
 	todo.Command("mv", "移动 待办项").
-		Arguments("<index>", "索引序号", nil).
-		Arguments("<distIndex>", "目标索引", nil).
+		Arguments("<fromId>", "索引序号", nil).
+		Arguments("<toId>", "目标索引", nil).
 		Action(processor.Move)
 
 	// conf
