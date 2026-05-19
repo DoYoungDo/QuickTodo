@@ -22,6 +22,7 @@ type Repository interface {
 	ModifyTodo(id int, todo Todo) (*Todo, error)
 	RemoveTodos(ids []int) ([]*Todo, error)
 	ClearTodos() ([]*Todo, error)
+	MoveTodo(fromId, toId int) (*Todo, error)
 	Size() int
 }
 

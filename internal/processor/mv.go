@@ -33,28 +33,13 @@ func Move(ctx *cmd.Context) {
 }
 
 func MoveTodo(repository data.Repository, out io.Writer, index, distIndex int) error {
-	todo, err := repository.GetTodoById(index)
+	todo, err := repository.MoveTodo(index, distIndex)
 	if err != nil {
-		return err
-	}
-	distTodo, err := repository.GetTodoById(distIndex)
-	if err != nil {
-		return err
-	}
-
-	to, err := repository.ModifyTodo(index, *distTodo)
-	if err != nil {
-		return err
-	}
-	from, err := repository.ModifyTodo(distIndex, *todo)
-	if err != nil {
-		repository.ModifyTodo(index, *todo)
 		return err
 	}
 
 	tb := newTodoTableWithTitle("moved")
-	tb.AddTodo(from)
-	tb.AddTodo(to)
+	tb.AddTodo(todo)
 
 	return tb.ShowTo(out)
 }

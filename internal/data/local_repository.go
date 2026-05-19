@@ -86,16 +86,24 @@ func (l *LocalRepository) CreateAndAddTodo(content string, done bool) (*Todo, er
 
 // AddTodos implements [Repository].
 func (l *LocalRepository) AddTodos(todos []*Todo) ([]*Todo, error) {
+	newTodos := make([]*Todo, 0, len(todos))
 	l.list.List = append(l.list.List, slices.Collect(func() iter.Seq[*Todo] {
+		index := len(l.list.List)
 		return func(yield func(*Todo) bool) {
 			for _, t := range todos {
-				if !yield(l.cloneTodo(t)) {
+				cloneT := l.cloneTodo(t)
+				cloneT.ID = index
+				index++
+
+				newTodos = append(newTodos, l.cloneTodo(cloneT))
+
+				if !yield(cloneT) {
 					return
 				}
 			}
 		}
 	}())...)
-	return todos, l.flushToLocal()
+	return newTodos, l.flushToLocal()
 }
 
 // GetTodos implements [Repository].
@@ -189,6 +197,46 @@ func (l *LocalRepository) ClearTodos() ([]*Todo, error) {
 		return nil, err
 	}
 	return clearedTodos, nil
+}
+
+// MoveTodo implements [Repository].
+func (l *LocalRepository) MoveTodo(fromId int, toId int) (*Todo, error) {
+	length := l.Size()
+	if fromId >= length || fromId < 0 {
+		return nil, fmt.Errorf("index %d out of range", fromId)
+	}
+	if toId >= length || toId < 0 {
+		return nil, fmt.Errorf("distIndex %d out of range", toId)
+	}
+
+	if fromId == toId {
+		return l.cloneTodo(l.list.List[fromId]), nil
+	}
+
+	newlist := make([]*Todo, 0, len(l.list.List))
+
+	if fromId > toId {
+		newlist = append(newlist, l.list.List[:toId]...)
+		newlist = append(newlist, l.list.List[fromId])
+		newlist = append(newlist, l.list.List[toId:fromId]...)
+		if fromId+1 < length {
+			newlist = append(newlist, l.list.List[fromId+1:]...)
+		}
+	} else {
+		newlist = append(newlist, l.list.List[:fromId]...)
+		newlist = append(newlist, l.list.List[fromId+1:toId+1]...)
+		newlist = append(newlist, l.list.List[fromId])
+		if toId+1 < length {
+			newlist = append(newlist, l.list.List[toId+1:]...)
+		}
+	}
+
+	for index, todo := range newlist {
+		todo.ID = index
+	}
+	l.list.List = newlist
+
+	return l.cloneTodo(l.list.List[toId]), l.flushToLocal()
 }
 
 func (l *LocalRepository) Size() int {

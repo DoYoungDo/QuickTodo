@@ -169,6 +169,129 @@ func TestLocalRepository_RemoveTodosMissingID(t *testing.T) {
 	}
 }
 
+func TestLocalRepository_MoveTodoReordersAndReindexes(t *testing.T) {
+	repo, path := newTestRepository(t)
+	for _, content := range []string{"zero", "one", "two", "three"} {
+		if _, err := repo.CreateAndAddTodo(content, false); err != nil {
+			t.Fatalf("CreateAndAddTodo(%q) error = %v", content, err)
+		}
+	}
+
+	moved, err := repo.MoveTodo(0, 2)
+	if err != nil {
+		t.Fatalf("MoveTodo(0, 2) error = %v", err)
+	}
+	if moved.ID != 2 || moved.Content != "zero" {
+		t.Fatalf("unexpected moved todo: %+v", moved)
+	}
+
+	todos, err := repo.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos() error = %v", err)
+	}
+	wantContents := []string{"one", "two", "zero", "three"}
+	for i, todo := range todos {
+		if todo.ID != i || todo.Content != wantContents[i] {
+			t.Fatalf("todo[%d] = %+v, want ID=%d Content=%q", i, todo, i, wantContents[i])
+		}
+	}
+
+	reopened, err := NewLocalRepositoryWithPath(path)
+	if err != nil {
+		t.Fatalf("NewLocalRepositoryWithPath(reopen) error = %v", err)
+	}
+	persisted, err := reopened.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos(reopen) error = %v", err)
+	}
+	for i, todo := range persisted {
+		if todo.ID != i || todo.Content != wantContents[i] {
+			t.Fatalf("persisted todo[%d] = %+v, want ID=%d Content=%q", i, todo, i, wantContents[i])
+		}
+	}
+
+	moved, err = repo.MoveTodo(3, 1)
+	if err != nil {
+		t.Fatalf("MoveTodo(3, 1) error = %v", err)
+	}
+	if moved.ID != 1 || moved.Content != "three" {
+		t.Fatalf("unexpected moved todo after moving up: %+v", moved)
+	}
+	todos, err = repo.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos() after moving up error = %v", err)
+	}
+	wantContents = []string{"one", "three", "two", "zero"}
+	for i, todo := range todos {
+		if todo.ID != i || todo.Content != wantContents[i] {
+			t.Fatalf("todo[%d] after moving up = %+v, want ID=%d Content=%q", i, todo, i, wantContents[i])
+		}
+	}
+}
+
+func TestLocalRepository_MoveTodoSameIDReturnsCloneWithoutReordering(t *testing.T) {
+	repo, _ := newTestRepository(t)
+	for _, content := range []string{"zero", "one"} {
+		if _, err := repo.CreateAndAddTodo(content, false); err != nil {
+			t.Fatalf("CreateAndAddTodo(%q) error = %v", content, err)
+		}
+	}
+
+	moved, err := repo.MoveTodo(1, 1)
+	if err != nil {
+		t.Fatalf("MoveTodo(1, 1) error = %v", err)
+	}
+	if moved.ID != 1 || moved.Content != "one" {
+		t.Fatalf("unexpected moved todo: %+v", moved)
+	}
+	moved.Content = "changed"
+
+	todos, err := repo.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos() error = %v", err)
+	}
+	if len(todos) != 2 || todos[0].ID != 0 || todos[0].Content != "zero" || todos[1].ID != 1 || todos[1].Content != "one" {
+		t.Fatalf("same-id move should not reorder or expose internal data: %+v", todos)
+	}
+}
+
+func TestLocalRepository_MoveTodoOutOfRange(t *testing.T) {
+	repo, _ := newTestRepository(t)
+	if _, err := repo.MoveTodo(0, 0); err == nil {
+		t.Fatal("MoveTodo() on empty repository expected error")
+	}
+	for _, content := range []string{"zero", "one"} {
+		if _, err := repo.CreateAndAddTodo(content, false); err != nil {
+			t.Fatalf("CreateAndAddTodo(%q) error = %v", content, err)
+		}
+	}
+
+	for _, tc := range []struct {
+		name   string
+		fromID int
+		toID   int
+	}{
+		{name: "negative from", fromID: -1, toID: 0},
+		{name: "negative to", fromID: 0, toID: -1},
+		{name: "from too large", fromID: 2, toID: 0},
+		{name: "to too large", fromID: 0, toID: 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := repo.MoveTodo(tc.fromID, tc.toID); err == nil {
+				t.Fatalf("MoveTodo(%d, %d) expected error", tc.fromID, tc.toID)
+			}
+		})
+	}
+
+	todos, err := repo.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos() error = %v", err)
+	}
+	if len(todos) != 2 || todos[0].ID != 0 || todos[0].Content != "zero" || todos[1].ID != 1 || todos[1].Content != "one" {
+		t.Fatalf("out-of-range move should not mutate todos: %+v", todos)
+	}
+}
+
 func TestLocalRepository_ClearTodos(t *testing.T) {
 	repo, path := newTestRepository(t)
 	for _, content := range []string{"one", "two"} {

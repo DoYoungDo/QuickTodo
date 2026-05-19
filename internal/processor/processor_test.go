@@ -272,6 +272,54 @@ func TestRemoveTodosDeletesAll(t *testing.T) {
 	}
 }
 
+func TestMoveTodoReordersAndPrintsMovedTodo(t *testing.T) {
+	repo := newProcessorTestRepository(t)
+	for _, content := range []string{"zero", "one", "two"} {
+		if _, err := repo.CreateAndAddTodo(content, false); err != nil {
+			t.Fatalf("CreateAndAddTodo(%q) error = %v", content, err)
+		}
+	}
+	var out bytes.Buffer
+
+	if err := MoveTodo(repo, &out, 0, 2); err != nil {
+		t.Fatalf("MoveTodo() error = %v", err)
+	}
+
+	todos, err := repo.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos() error = %v", err)
+	}
+	if len(todos) != 3 || todos[0].ID != 0 || todos[0].Content != "one" || todos[1].ID != 1 || todos[1].Content != "two" || todos[2].ID != 2 || todos[2].Content != "zero" {
+		t.Fatalf("unexpected todos after move: %+v", todos)
+	}
+	output := out.String()
+	if !strings.Contains(output, "moved") || !strings.Contains(output, "zero") || strings.Contains(output, "one") || strings.Contains(output, "two") {
+		t.Fatalf("unexpected move output: %s", output)
+	}
+}
+
+func TestMoveTodoReturnsErrorForOutOfRange(t *testing.T) {
+	repo := newProcessorTestRepository(t)
+	if _, err := repo.CreateAndAddTodo("keep", false); err != nil {
+		t.Fatalf("CreateAndAddTodo() error = %v", err)
+	}
+	var out bytes.Buffer
+
+	if err := MoveTodo(repo, &out, 0, 1); err == nil {
+		t.Fatal("MoveTodo() expected error for out-of-range destination")
+	}
+	if out.Len() != 0 {
+		t.Fatalf("MoveTodo() should not write output on error: %s", out.String())
+	}
+	todos, err := repo.GetTodos()
+	if err != nil {
+		t.Fatalf("GetTodos() error = %v", err)
+	}
+	if len(todos) != 1 || todos[0].ID != 0 || todos[0].Content != "keep" {
+		t.Fatalf("failed move should not mutate todos: %+v", todos)
+	}
+}
+
 func TestClearTodosRemovesAllItems(t *testing.T) {
 	repo := newProcessorTestRepository(t)
 	for _, content := range []string{"first", "second"} {
