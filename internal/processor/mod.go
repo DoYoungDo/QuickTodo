@@ -48,9 +48,14 @@ func Modify(ctx *cmd.Context) {
 		}
 		hasP := false
 		p := 0
-		if opt := ctx.Opt("priority"); !opt.IsEmpty() && opt.IsInt() {
+		if hd && oD {
 			hasP = true
-			p = opt.ToInt()
+			p = 0
+		} else {
+			if opt := ctx.Opt("priority"); !opt.IsEmpty() && opt.IsInt() {
+				hasP = true
+				p = opt.ToInt()
+			}
 		}
 
 		return oA, oI, hd, oD, hasP, p

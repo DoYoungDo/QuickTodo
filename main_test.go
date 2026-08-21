@@ -82,8 +82,8 @@ func TestCLIEndToEndTodoFlow(t *testing.T) {
 	}
 
 	output = runQuickTodo(t, configDir, "mod", "0", "-d", "-p", "2")
-	if !strings.Contains(output, "modified") || !strings.Contains(output, "✅") || !strings.Contains(output, "⭐⭐") {
-		t.Fatalf("mod done priority output unexpected: %s", output)
+	if !strings.Contains(output, "modified") || !strings.Contains(output, "✅") || strings.Contains(output, "⭐") {
+		t.Fatalf("mod done should clear priority output unexpected: %s", output)
 	}
 
 	output = runQuickTodo(t, configDir, "mod", "0", "-d=false")
