@@ -15,7 +15,7 @@ GitHub 仓库地址：<https://github.com/DoYoungDo/QuickTodo>
 ```sh
 git clone https://github.com/DoYoungDo/QuickTodo.git
 cd QuickTodo
-go build -o qtd .
+go build -o qtd ./cmd/quick_todo
 ```
 
 构建完成后，可以直接在当前目录运行：

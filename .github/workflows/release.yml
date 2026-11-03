@@ -47,12 +47,12 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           LDFLAGS="-s -w -X quick_todo/internal/app.APP_VERSION=${VERSION}"
           mkdir -p dist
-          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_darwin_amd64 .
-          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_darwin_arm64 .
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_linux_amd64 .
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_linux_arm64 .
-          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_windows_amd64.exe .
-          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_windows_arm64.exe .
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_darwin_amd64 ./cmd/quick_todo
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_darwin_arm64 ./cmd/quick_todo
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_linux_amd64 ./cmd/quick_todo
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_linux_arm64 ./cmd/quick_todo
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_windows_amd64.exe ./cmd/quick_todo
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_windows_arm64.exe ./cmd/quick_todo
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
