@@ -2,9 +2,9 @@ package ui
 
 import (
 	"bytes"
+	"quick_todo/internal/data"
 	"strings"
 	"testing"
-	"todo_list/internal/data"
 )
 
 func TestToDoTableShowsStatusPriorityAndTime(t *testing.T) {

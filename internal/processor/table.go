@@ -1,8 +1,8 @@
 package processor
 
 import (
-	"todo_list/internal/setting"
-	"todo_list/internal/ui"
+	"quick_todo/internal/setting"
+	"quick_todo/internal/ui"
 )
 
 func displayTableMode() string {

@@ -7,10 +7,10 @@ import (
 	"iter"
 	"os"
 	"path/filepath"
+	"quick_todo/internal/setting"
 	"slices"
 	"strings"
 	"time"
-	"todo_list/internal/setting"
 )
 
 type localTodoList struct {

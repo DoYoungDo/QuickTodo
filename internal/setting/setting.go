@@ -5,9 +5,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"quick_todo/internal/app"
 	"slices"
 	"sync"
-	"todo_list/internal/app"
 )
 
 const (

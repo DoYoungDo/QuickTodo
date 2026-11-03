@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"quick_todo/internal/data"
 	"strings"
 	"time"
-	"todo_list/internal/data"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"

@@ -1,8 +1,8 @@
 package data
 
 import (
+	"quick_todo/internal/setting"
 	"sync"
-	"todo_list/internal/setting"
 )
 
 type Todo struct {

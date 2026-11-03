@@ -3,9 +3,9 @@ package data
 import (
 	"os"
 	"path/filepath"
+	"quick_todo/internal/setting"
 	"testing"
 	"time"
-	"todo_list/internal/setting"
 )
 
 func newTestRepository(t *testing.T) (*LocalRepository, string) {

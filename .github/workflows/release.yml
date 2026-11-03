@@ -45,7 +45,7 @@ jobs:
       - name: Build release binaries
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          LDFLAGS="-s -w -X todo_list/internal/app.APP_VERSION=${VERSION}"
+          LDFLAGS="-s -w -X quick_todo/internal/app.APP_VERSION=${VERSION}"
           mkdir -p dist
           CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_darwin_amd64 .
           CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="$LDFLAGS" -o dist/qtd_darwin_arm64 .

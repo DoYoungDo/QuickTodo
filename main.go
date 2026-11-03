@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"todo_list/internal/app"
-	"todo_list/internal/processor"
-	confprocessor "todo_list/internal/processor/conf"
+	"quick_todo/internal/app"
+	"quick_todo/internal/processor"
+	confprocessor "quick_todo/internal/processor/conf"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )

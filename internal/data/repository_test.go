@@ -1,8 +1,8 @@
 package data
 
 import (
+	"quick_todo/internal/setting"
 	"testing"
-	"todo_list/internal/setting"
 )
 
 func TestNewRepositoryWithSettingUsesLocalRepository(t *testing.T) {

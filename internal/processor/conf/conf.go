@@ -2,10 +2,10 @@ package conf
 
 import (
 	"io"
+	"quick_todo/internal/setting"
+	"quick_todo/internal/ui"
 	"slices"
 	"strings"
-	"todo_list/internal/setting"
-	"todo_list/internal/ui"
 )
 
 func setConfig(out io.Writer, key, value string) error {

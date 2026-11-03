@@ -3,11 +3,11 @@ package processor
 import (
 	"bytes"
 	"path/filepath"
+	"quick_todo/internal/data"
+	"quick_todo/internal/ui"
 	"strings"
 	"testing"
 	"time"
-	"todo_list/internal/data"
-	"todo_list/internal/ui"
 )
 
 func newProcessorTestRepository(t *testing.T) *data.LocalRepository {

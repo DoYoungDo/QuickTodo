@@ -1,9 +1,9 @@
-module todo_list
+module quick_todo
 
 go 1.26.0
 
 require (
-	github.com/DoYoungDo/commander-go v0.0.17
+	github.com/DoYoungDo/commander-go v0.2.1
 	github.com/jedib0t/go-pretty/v6 v6.7.10
 )
 

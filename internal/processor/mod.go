@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"todo_list/internal/data"
+	"quick_todo/internal/data"
 
 	cmd "github.com/DoYoungDo/commander-go"
 )
